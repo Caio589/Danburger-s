@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DANBURGER'S - Cardápio Digital</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif;}
+body{
+  background:url('https://images.unsplash.com/photo-1550547660-d9450f859349?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1080&q=80') no-repeat center/cover;
+  min-height:100vh;color:#fff;position:relative;
+}
+body::before{
+  content:"";position:absolute;top:0;left:0;width:100%;height:100%;
+  background:rgba(0,0,0,0.45);backdrop-filter:blur(3px);z-index:0;
+}
+.overlay{position:relative;z-index:1;max-width:850px;margin:auto;padding:20px;}
+header{text-align:center;margin-bottom:20px;}
+header h1{color:#ffd700;text-shadow:2px 2px 5px #000;margin-bottom:10px;}
+.category{
+  background:rgba(255,255,255,0.15);padding:12px;border-radius:10px;
+  margin-bottom:10px;cursor:pointer;font-size:1.2rem;font-weight:bold;
+}
+.category:hover{background:rgba(255,255,255,0.25);}
+.products{display:none;margin-bottom:20px;}
+.product{
+  display:flex;justify-content:space-between;align-items:center;
+  background:rgba(255,255,255,0.1);padding:10px;border-radius:8px;margin:6px 0;
+}
+.qty-container{display:flex;align-items:center;}
+.qty-container button{
+  width:30px;height:30px;background:#d32f2f;color:#fff;border:none;
+  border-radius:5px;font-size:20px;font-weight:bold;cursor:pointer;
+}
+.qty-container input{
+  width:40px;text-align:center;margin:0 5px;border-radius:5px;
+}
+input, select{
+  width:100%;padding:10px;margin-top:10px;border-radius:8px;border:none;
+}
+.total{margin-top:15px;font-size:22px;text-align:right;}
+#sendOrder{
+  width:100%;padding:15px;background:#d32f2f;border:none;border-radius:8px;
+  font-size:18px;color:#fff;margin-top:20px;cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+<div class="overlay">
+
+<header>
+  <h1>DANBURGER'S</h1>
+  <p>Faça seu pedido</p>
+</header>
+
+<div id="menuContainer"></div>
+
+<h3 style="margin-top:20px;">Dados do Cliente</h3>
+<input id="clienteNome" placeholder="Nome completo" required>
+<input id="clienteRua" placeholder="Rua / Endereço" required>
+<input id="clienteNumero" placeholder="Número da Casa" required>
+
+<select id="deliveryOption">
+  <option value="0">Retirar no local — Grátis</option>
+  <optgroup label="Entrega dentro da cidade — Grátis">
+    <option value="0">Centro</option>
+    <option value="0">Bairro Próximo 1</option>
+    <option value="0">Bairro Próximo 2</option>
+  </optgroup>
+  <optgroup label="Entrega fora da cidade — R$7">
+    <option value="7">Bairro Distante</option>
+    <option value="7">Zona Rural</option>
+    <option value="7">Fora da cidade</option>
+  </optgroup>
+</select>
+
+<select id="paymentMethod">
+  <option value="pix">Pix</option>
+  <option value="cartao">Cartão</option>
+  <option value="dinheiro">Dinheiro</option>
+</select>
+
+<div id="trocoDiv" style="display:none;">
+  <input type="number" id="dinheiroValor" placeholder="Valor da nota">
+</div>
+
+<div class="total">Total: R$ <span id="total">0.00</span></div>
+
+<button id="sendOrder">Enviar Pedido</button>
+
+</div>
+
+<script src="utils.js"></script>
+
+<script>
+/* =====================
+   CARDÁPIO DO PDF COMPLETO
+===================== */
+const menuData = {
+
+  "Linha Gourmet": [
+    {name:"Mateus", price:26},
+    {name:"Picanha Bacon", price:25},
+    {name:"Picanha Top", price:26},
+    {name:"Duplo Costela", price:26},
+    {name:"Chapada", price:26},
+  ],
+
+  "Pizzas Salgadas": [
+    {name:"Calabresa", P:22, M:28, G:35},
+    {name:"Mussarela", P:24, M:31, G:37},
+    {name:"Portuguesa", P:29, M:32, G:45},
+    {name:"Frango Catupiry", P:28, M:31, G:44},
+    {name:"Bacon", P:29, M:32, G:45},
+    {name:"Marguerita", P:24, M:31, G:37},
+    {name:"Brócolis", P:28, M:32, G:45},
+    {name:"Atum", P:29, M:33, G:45},
+    {name:"Toscana", P:29, M:33, G:45},
+    {name:"Toscana Bacon", P:32, M:36, G:53}
+  ],
+
+  "Pizzas Doces": [
+    {name:"Romeu e Julieta", P:40, M:50, G:60},
+    {name:"Prestígio", P:40, M:50, G:60},
+    {name:"Brigadeiro", P:40, M:50, G:60},
+    {name:"Morango", P:7, M:7, G:7},
+    {name:"Kit Kat", P:7, M:7, G:7},
+    {name:"Oreo", P:7, M:7, G:7},
+    {name:"Banana Nevada", P:7, M:7, G:7},
+  ],
+
+  "Esfihas": [
+    {name:"Carne", price:3},
+    {name:"Carne com Queijo", price:4.5},
+    {name:"Calabresa", price:4},
+    {name:"Frango Catupiry", price:4},
+    {name:"Queijo", price:4},
+    {name:"Atum", price:5},
+  ],
+
+  "Lanches": [
+    {name:"Americano", price:12},
+    {name:"Bauru", price:10},
+    {name:"Misto Quente", price:8},
+    {name:"X-Burguer", price:16},
+    {name:"X-Burguer Salada", price:17},
+    {name:"X-Burguer Egg", price:18},
+    {name:"X-Frango Salada", price:18},
+    {name:"X-Frango Bacon", price:19},
+    {name:"X-Frango Calabresa", price:20},
+    {name:"X-Lombo Salada", price:18},
+    {name:"X-Lombo Egg", price:20},
+    {name:"X-Picanha", price:21},
+  ],
+
+  "Porções": [
+    {name:"Filé acebolado", price:40},
+    {name:"Calabresa acebolada", price:33},
+    {name:"Frango acebolado", price:38},
+    {name:"Porção mista", price:50},
+    {name:"Batata Frita 1", price:20},
+    {name:"Batata Frita 2", price:25},
+  ],
+
+  "Bebidas": [
+    {name:"Skol Litrinho", price:5},
+    {name:"Skol Lata", price:5},
+    {name:"Brahma Lata", price:5},
+    {name:"Corona Long Neck", price:10},
+    {name:"Heineken Long Neck", price:10},
+    {name:"Refrigerante Lata", price:6},
+    {name:"Suco Copo", price:6},
+    {name:"Suco Jarra", price:16},
+  ],
+
+};
+
+/* =====================
+   GERA AS CATEGORIAS
+===================== */
+const menuContainer=document.getElementById("menuContainer");
+
+Object.keys(menuData).forEach(cat=>{
+  const catDiv=document.createElement("div");
+  catDiv.className="category";
+  catDiv.textContent=cat;
+
+  const prodList=document.createElement("div");
+  prodList.className="products";
+
+  menuData[cat].forEach(item=>{
+    if(item.P !== undefined){
+      prodList.innerHTML += generatePizza(item);
+    } else {
+      prodList.innerHTML += generateSimple(item);
+    }
+  });
+
+  catDiv.onclick = ()=>prodList.style.display =
+    prodList.style.display==="block" ? "none" : "block";
+
+  menuContainer.appendChild(catDiv);
+  menuContainer.appendChild(prodList);
+});
+
+function generateSimple(item){
+  return `
+    <div class="product" data-name="${item.name}" data-price="${item.price}">
+      <span>${item.name} — R$${item.price}</span>
+      <div class="qty-container">
+        <button class="minus">-</button>
+        <input class="qty" value="0">
+        <button class="plus">+</button>
+      </div>
+    </div>`;
+}
+
+function generatePizza(item){
+  return `
+    <div class="product" data-name="${item.name} P" data-price="${item.P}">
+      <span>${item.name} (P) — R$${item.P}</span>
+      <div class="qty-container">
+        <button class="minus">-</button><input class="qty" value="0">
+        <button class="plus">+</button></div>
+    </div>
+
+    <div class="product" data-name="${item.name} M" data-price="${item.M}">
+      <span>${item.name} (M) — R$${item.M}</span>
+      <div class="qty-container">
+        <button class="minus">-</button><input class="qty" value="0">
+        <button class="plus">+</button></div>
+    </div>
+
+    <div class="product" data-name="${item.name} G" data-price="${item.G}">
+      <span>${item.name} (G) — R$${item.G}</span>
+      <div class="qty-container">
+        <button class="minus">-</button><input class="qty" value="0">
+        <button class="plus">+</button></div>
+    </div>`;
+}
+
+/* =====================
+   ATUALIZA TOTAL
+===================== */
+function updateTotal(){
+  let total=0;
+  document.querySelectorAll(".product").forEach(p=>{
+    const qty=parseInt(p.querySelector(".qty").value)||0;
+    total += qty * parseFloat(p.dataset.price);
+  });
+
+  total += parseFloat(deliveryOption.value);
+  document.getElementById("total").innerText = total.toFixed(2);
+}
+
+document.addEventListener("click",e=>{
+  if(e.target.classList.contains("plus")){
+    let input=e.target.previousElementSibling;
+    input.value=parseInt(input.value)+1;
+    updateTotal();
+  }
+  if(e.target.classList.contains("minus")){
+    let input=e.target.nextElementSibling;
+    input.value=Math.max(0,parseInt(input.value)-1);
+    updateTotal();
+  }
+});
+
+deliveryOption.onchange = updateTotal;
+
+paymentMethod.onchange = ()=>{
+  trocoDiv.style.display = paymentMethod.value==="dinheiro" ? "block" : "none";
+};
+
+/* =====================
+   ENVIA PARA WHATSAPP + SALVA NO ADM
+===================== */
+document.getElementById("sendOrder").onclick = ()=>{
+
+  const nome=clienteNome.value.trim();
+  const rua=clienteRua.value.trim();
+  const numero=clienteNumero.value.trim();
+
+  if(!nome || !rua || !numero){
+    alert("Preencha todos os dados!");
+    return;
+  }
+
+  let itens = [];
+  document.querySelectorAll(".product").forEach(p=>{
+    const qty=parseInt(p.querySelector(".qty").value)||0;
+    if(qty>0){
+      itens.push({
+        nome:p.dataset.name,
+        qtd:qty,
+        subtotal:qty*parseFloat(p.dataset.price)
+      });
+    }
+  });
+
+  const total = document.getElementById("total").innerText;
+
+  let msg = `PEDIDO DANBURGER'S%0A%0A`;
+
+  itens.forEach(i=>{
+    msg += `${i.nome} x${i.qtd} — R$${i.subtotal.toFixed(2)}%0A`;
+  });
+
+  msg += `%0ACliente: ${nome}`;
+  msg += `%0AEndereço: ${rua}, Nº ${numero}`;
+  msg += `%0AEntrega: ${deliveryOption.options[deliveryOption.selectedIndex].text}`;
+  msg += `%0APagamento: ${paymentMethod.value}`;
+  msg += `%0ATotal: R$${total}`;
+
+  // ENVIO PARA WHATSAPP
+  window.open("https://wa.me/5577981184890?text=" + msg, "_blank");
+
+  // SALVAMENTO PARA PAINEL ADM
+  salvarPedidoNoADM(nome, rua, numero, itens, deliveryOption, paymentMethod, total);
+};
+
+updateTotal();
+</script>
+
+</body>
+</html>

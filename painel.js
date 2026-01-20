@@ -1,90 +1,56 @@
-let data = JSON.parse(localStorage.getItem("cardapio")) || {
-  config:{ whatsapp:"", entrega:0 },
-  categorias:[],
-  produtos:[],
-  pizzas:[],
-  adicionais:[]
-};
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Painel ADM - Danburger's</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-function salvar(){
-  localStorage.setItem("cardapio", JSON.stringify(data));
-  render();
-}
+<div class="container">
+<h1>Painel Administrativo</h1>
 
-function salvarConfig(){
-  data.config.whatsapp = whatsapp.value;
-  data.config.entrega = Number(entrega.value);
-  salvar();
-}
+<h2>Configurações</h2>
+<input id="whatsapp" placeholder="WhatsApp (ex: 5577999999999)">
+<input id="entrega" type="number" placeholder="Taxa de entrega">
+<button onclick="salvarConfig()">Salvar Configurações</button>
 
-function addCategoria(){
-  if(!catNome.value) return;
-  data.categorias.push(catNome.value);
-  catNome.value="";
-  salvar();
-}
+<hr>
 
-function addProduto(){
-  data.produtos.push({
-    tipo:"normal",
-    categoria: produtoCategoria.value,
-    nome: produtoNome.value,
-    desc: produtoDesc.value,
-    preco: Number(produtoPreco.value)
-  });
-  produtoNome.value="";
-  produtoDesc.value="";
-  produtoPreco.value="";
-  salvar();
-}
+<h2>Categorias</h2>
+<input id="catNome" placeholder="Nome da categoria">
+<button onclick="addCategoria()">Adicionar Categoria</button>
 
-function addPizza(){
-  data.pizzas.push({
-    nome: pizzaNome.value,
-    desc: pizzaDesc.value,
-    P:Number(pizzaP.value),
-    M:Number(pizzaM.value),
-    G:Number(pizzaG.value)
-  });
-  pizzaNome.value="";
-  pizzaDesc.value="";
-  pizzaP.value="";
-  pizzaM.value="";
-  pizzaG.value="";
-  salvar();
-}
+<hr>
 
-function addAdicional(){
-  data.adicionais.push({
-    nome: addNome.value,
-    preco: Number(addPreco.value)
-  });
-  addNome.value="";
-  addPreco.value="";
-  salvar();
-}
+<h2>Novo Produto</h2>
+<select id="produtoCategoria"></select>
+<input id="produtoNome" placeholder="Nome do produto">
+<input id="produtoDesc" placeholder="Descrição">
 
-function render(){
-  produtoCategoria.innerHTML="";
-  data.categorias.forEach(c=>{
-    produtoCategoria.innerHTML += `<option>${c}</option>`;
-  });
+<label>
+  <input type="checkbox" id="ehPizza" onchange="togglePizza()"> É pizza?
+</label>
 
-  listaProdutos.innerHTML="<h3>Produtos / Pizzas</h3>";
-  data.produtos.forEach(p=>{
-    listaProdutos.innerHTML += `<div>${p.nome} - R$ ${p.preco}</div>`;
-  });
-  data.pizzas.forEach(p=>{
-    listaProdutos.innerHTML += `<div>🍕 ${p.nome} (P:${p.P} M:${p.M} G:${p.G})</div>`;
-  });
+<div id="precoNormal">
+  <input id="produtoPreco" type="number" placeholder="Preço">
+</div>
 
-  listaAdicionais.innerHTML="<h3>Adicionais</h3>";
-  data.adicionais.forEach(a=>{
-    listaAdicionais.innerHTML += `<div>${a.nome} - R$ ${a.preco}</div>`;
-  });
+<div id="precosPizza" style="display:none;">
+  <input id="pizzaP" type="number" placeholder="Preço P">
+  <input id="pizzaM" type="number" placeholder="Preço M">
+  <input id="pizzaG" type="number" placeholder="Preço G">
+</div>
 
-  whatsapp.value=data.config.whatsapp;
-  entrega.value=data.config.entrega;
-}
+<button onclick="addProduto()">Adicionar Produto</button>
 
-render();
+<hr>
+
+<h2>Produtos Cadastrados</h2>
+<div id="listaProdutos"></div>
+
+</div>
+
+<script src="painel.js"></script>
+</body>
+</html>

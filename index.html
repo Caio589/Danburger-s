@@ -141,11 +141,12 @@ function categoria(titulo){
 }
 
 function item(i){
+  const preco = Number(i.price || 0);
   return `
-  <div class="product" data-name="${i.name}" data-price="${i.price}">
+  <div class="product" data-name="${i.name}" data-price="${preco}">
     <div>
-      <strong>${i.name} — R$${i.price.toFixed(2)}</strong>
-      ${i.desc?`<div class="desc">${i.desc}</div>`:""}
+      <strong>${i.name}${preco ? ` — R$${preco.toFixed(2)}` : ""}</strong>
+      ${i.desc ? `<div class="desc">${i.desc}</div>` : ""}
     </div>
     <div class="qty">
       <button onclick="q(this,-1)">-</button>
@@ -170,7 +171,7 @@ p = categoria("🍔 Lanches");
   ...MENU_LANCHES.prato
 ].forEach(i=>p.innerHTML+=item(i));
 
-/* ===== PIZZAS ===== */
+ ===== PIZZAS ===== */
 /*p = categoria("🍕 Pizzas");
 MENU_PIZZAS.forEach(pz=>{
   p.innerHTML+=`
@@ -185,7 +186,7 @@ MENU_PIZZAS.forEach(pz=>{
       <button onclick="addPizza('${pz.name} G',${pz.G})">G ${pz.G}</button>
     </div>
   </div>`;
-});*/
+});
 
 /* ===== ESFIHAS ===== */
 p = categoria("🥟 Esfihas Salgadas");

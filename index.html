@@ -7,8 +7,8 @@
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
-body{background:#0f0f0f;color:#fff}
-.container{max-width:980px;margin:auto;padding:20px}
+body{background:#0e0e0e;color:#fff}
+.container{max-width:950px;margin:auto;padding:20px}
 header{text-align:center;margin-bottom:20px}
 header h1{color:#ffd700}
 
@@ -96,8 +96,8 @@ input,select{
 <div id="menu"></div>
 
 <h3>Dados do Cliente</h3>
-<input id="nome" placeholder="Nome do cliente">
-<input id="rua" placeholder="Rua / Endereço">
+<input id="nome" placeholder="Nome">
+<input id="rua" placeholder="Rua">
 <input id="numero" placeholder="Número">
 
 <select id="entrega">
@@ -127,90 +127,96 @@ input,select{
 <script>
 const menu = document.getElementById("menu");
 
-function criarCategoria(titulo, html){
+/* ===== UTIL ===== */
+function categoria(titulo){
   const c=document.createElement("div");
   c.className="category";
   c.textContent=titulo;
-
-  const list=document.createElement("div");
-  list.className="products";
-  list.innerHTML=html;
-
-  c.onclick=()=>list.style.display=list.style.display==="block"?"none":"block";
+  const p=document.createElement("div");
+  p.className="products";
+  c.onclick=()=>p.style.display=p.style.display==="block"?"none":"block";
   menu.appendChild(c);
-  menu.appendChild(list);
+  menu.appendChild(p);
+  return p;
 }
 
-/* ===== FUNÇÕES ===== */
-function blocoSimples(lista){
-  return lista.map(i=>`
-    <div class="product" data-name="${i.name}" data-price="${i.price}">
-      <div>
-        <strong>${i.name} — R$${i.price.toFixed(2)}</strong>
-        ${i.desc?`<div class="desc">${i.desc}</div>`:""}
-      </div>
-      <div class="qty">
-        <button onclick="q(this,-1)">-</button>
-        <input value="0">
-        <button onclick="q(this,1)">+</button>
-      </div>
+function item(i){
+  return `
+  <div class="product" data-name="${i.name}" data-price="${i.price}">
+    <div>
+      <strong>${i.name} — R$${i.price.toFixed(2)}</strong>
+      ${i.desc?`<div class="desc">${i.desc}</div>`:""}
     </div>
-  `).join("");
-}
-
-function blocoPizzas(){
-  return MENU_PIZZAS.map(p=>`
-    <div class="product">
-      <div>
-        <strong>${p.name}</strong>
-        <div class="desc">${p.desc}</div>
-      </div>
-      <div class="size">
-        <button onclick="addPizza('${p.name} P',${p.P})">P R$${p.P}</button>
-        <button onclick="addPizza('${p.name} M',${p.M})">M R$${p.M}</button>
-        <button onclick="addPizza('${p.name} G',${p.G})">G R$${p.G}</button>
-      </div>
+    <div class="qty">
+      <button onclick="q(this,-1)">-</button>
+      <input value="0">
+      <button onclick="q(this,1)">+</button>
     </div>
-  `).join("");
+  </div>`;
 }
 
-/* ===== CATEGORIAS ===== */
-criarCategoria("⭐ Linha Gourmet", blocoSimples(MENU_GOURMET));
+/* ===== LINHA GOURMET ===== */
+let p = categoria("⭐ Linha Gourmet");
+MENU_GOURMET.forEach(i=>p.innerHTML+=item(i));
 
-criarCategoria("🍔 Lanches", blocoSimples([
+/* ===== LANCHES ===== */
+p = categoria("🍔 Lanches");
+[
   ...MENU_LANCHES.hamburguer,
   ...MENU_LANCHES.fileMignon,
   ...MENU_LANCHES.frango,
   ...MENU_LANCHES.lombo,
   ...MENU_LANCHES.especiais,
   ...MENU_LANCHES.prato
-]));
+].forEach(i=>p.innerHTML+=item(i));
 
-criarCategoria("🍕 Pizzas", blocoPizzas());
-criarCategoria("🥟 Esfihas Salgadas", blocoSimples(MENU_ESFIHAS.salgadas));
-criarCategoria("🍫 Esfihas Doces", blocoSimples(MENU_ESFIHAS.doces));
-criarCategoria("🥪 Beirutes", blocoSimples(MENU_BEIRUTES));
-criarCategoria("🍽️ Parmegiana", blocoSimples(MENU_PARMEGIANA));
-criarCategoria("🍟 Porções", blocoSimples(MENU_PORCOES));
-criarCategoria("🍳 Omeletes", blocoSimples(MENU_OMELETES));
-criarCategoria("🥤 Bebidas", blocoSimples(MENU_BEBIDAS));
-criarCategoria("🧃 Sucos (Copo)", blocoSimples(MENU_SUCOS.copo));
-criarCategoria("🧃 Sucos (Jarra)", blocoSimples(MENU_SUCOS.jarra));
+/* ===== PIZZAS ===== */
+p = categoria("🍕 Pizzas");
+MENU_PIZZAS.forEach(pz=>{
+  p.innerHTML+=`
+  <div class="product">
+    <div>
+      <strong>${pz.name}</strong>
+      <div class="desc">${pz.desc}</div>
+    </div>
+    <div class="size">
+      <button onclick="addPizza('${pz.name} P',${pz.P})">P ${pz.P}</button>
+      <button onclick="addPizza('${pz.name} M',${pz.M})">M ${pz.M}</button>
+      <button onclick="addPizza('${pz.name} G',${pz.G})">G ${pz.G}</button>
+    </div>
+  </div>`;
+});
 
-/* ===== CONTROLES ===== */
+/* ===== ESFIHAS ===== */
+p = categoria("🥟 Esfihas Salgadas");
+MENU_ESFIHAS.salgadas.forEach(i=>p.innerHTML+=item(i));
+
+p = categoria("🍫 Esfihas Doces");
+MENU_ESFIHAS.doces.forEach(i=>p.innerHTML+=item(i));
+
+/* ===== OUTROS ===== */
+p = categoria("🥪 Beirutes"); MENU_BEIRUTES.forEach(i=>p.innerHTML+=item(i));
+p = categoria("🍽️ Parmegiana"); MENU_PARMEGIANA.forEach(i=>p.innerHTML+=item(i));
+p = categoria("🍟 Porções"); MENU_PORCOES.forEach(i=>p.innerHTML+=item(i));
+p = categoria("🍳 Omeletes"); MENU_OMELETES.forEach(i=>p.innerHTML+=item(i));
+p = categoria("🥤 Bebidas"); MENU_BEBIDAS.forEach(i=>p.innerHTML+=item(i));
+p = categoria("🧃 Sucos (Copo)"); MENU_SUCOS.copo.forEach(i=>p.innerHTML+=item(i));
+p = categoria("🧃 Sucos (Jarra)"); MENU_SUCOS.jarra.forEach(i=>p.innerHTML+=item(i));
+
+/* ===== CONTROLE ===== */
 function q(btn,v){
   const i=btn.parentElement.querySelector("input");
   i.value=Math.max(0,parseInt(i.value)+v);
   calc();
 }
 
-function addPizza(nome,preco){
+function addPizza(n,p){
   const div=document.createElement("div");
   div.className="product";
-  div.dataset.name=nome;
-  div.dataset.price=preco;
+  div.dataset.name=n;
+  div.dataset.price=p;
   div.innerHTML=`
-    <div><strong>${nome} — R$${preco.toFixed(2)}</strong></div>
+    <div><strong>${n} — R$${p.toFixed(2)}</strong></div>
     <div class="qty">
       <button onclick="q(this,-1)">-</button>
       <input value="1">
@@ -232,7 +238,7 @@ entrega.onchange=calc;
 
 function enviar(){
   if(!nome.value||!rua.value||!numero.value){
-    alert("Preencha os dados do cliente");
+    alert("Preencha os dados");
     return;
   }
   let msg="PEDIDO DANBURGER'S\n\n";
@@ -244,7 +250,6 @@ function enviar(){
   msg+=`\nEndereço: ${rua.value}, Nº ${numero.value}`;
   msg+=`\nEntrega: ${entrega.options[entrega.selectedIndex].text}`;
   msg+=`\nTotal: R$${total.textContent}`;
-
   window.open("https://wa.me/5577981184890?text="+encodeURIComponent(msg));
 }
 </script>

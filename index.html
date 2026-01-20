@@ -2,23 +2,80 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DANBURGER'S</title>
-<link rel="stylesheet" href="style.css">
-</head>
-<body>
 
+<link rel="stylesheet" href="style.css">
+
+<style>
+body{
+  background:url("https://images.unsplash.com/photo-1550547660-d9450f859349")
+  no-repeat center center fixed;
+  background-size:cover;
+}
+.overlay{
+  background:rgba(0,0,0,0.65);
+  min-height:100vh;
+}
+</style>
+</head>
+
+<body>
+<div class="overlay">
 <div class="container">
+
 <h1>DANBURGER'S</h1>
 
+<!-- DADOS DO CLIENTE -->
+<h2>👤 Dados do Cliente</h2>
+<input id="nome" placeholder="Nome do cliente">
+<input id="endereco" placeholder="Endereço completo (Rua, Nº, Bairro)">
+
+<!-- CARDÁPIO -->
+<h2>📋 Cardápio</h2>
 <div id="menu"></div>
 
-<h2>Entrega</h2>
-<select id="tipo">
+<!-- TAMANHO DA PIZZA -->
+<h2>🍕 Tamanho da Pizza</h2>
+<select id="pizzaSize" onchange="calcTotal()">
+  <option value="0">Não é pizza</option>
+  <option value="P">Pequena</option>
+  <option value="M">Média</option>
+  <option value="G">Grande</option>
+</select>
+
+<!-- ADICIONAIS -->
+<h2>➕ Adicionais</h2>
+<label><input type="checkbox" value="1" onchange="calcTotal()"> Alface (+R$1)</label><br>
+<label><input type="checkbox" value="2" onchange="calcTotal()"> Ovo (+R$2)</label><br>
+<label><input type="checkbox" value="4" onchange="calcTotal()"> Bacon (+R$4)</label><br>
+<label><input type="checkbox" value="3" onchange="calcTotal()"> Cheddar (+R$3)</label><br>
+<label><input type="checkbox" value="6" onchange="calcTotal()"> Hambúrguer (+R$6)</label>
+
+<!-- ENTREGA -->
+<h2>🚚 Entrega</h2>
+<select id="entrega" onchange="calcTotal()">
   <option value="0">Retirar no local</option>
 </select>
 
-<h2>Total: R$ <span id="total">0.00</span></h2>
-<button onclick="enviar()">Enviar no WhatsApp</button>
+<!-- PAGAMENTO -->
+<h2>💳 Pagamento</h2>
+<select id="pagamento" onchange="trocoToggle()">
+  <option value="Pix">Pix</option>
+  <option value="Dinheiro">Dinheiro</option>
+  <option value="Débito">Cartão Débito</option>
+  <option value="Crédito">Cartão Crédito</option>
+</select>
+
+<div id="trocoDiv" style="display:none;">
+  <input id="troco" type="number" placeholder="Troco para quanto?">
+</div>
+
+<h2>💰 Total: R$ <span id="total">0.00</span></h2>
+
+<button onclick="enviar()">📲 Enviar Pedido no WhatsApp</button>
+
+</div>
 </div>
 
 <script src="app.js"></script>

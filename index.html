@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DANBURGER'S - Cardápio Digital</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
+body{background:#0f0f0f;color:#fff}
+.container{max-width:980px;margin:auto;padding:20px}
+header{text-align:center;margin-bottom:20px}
+header h1{color:#ffd700}
+
+.category{
+  background:#1f1f1f;
+  padding:14px;
+  border-radius:12px;
+  margin-top:15px;
+  font-size:1.2rem;
+  font-weight:bold;
+  cursor:pointer
+}
+.products{display:none;margin-top:10px}
+
+.product{
+  background:#2b2b2b;
+  border-radius:10px;
+  padding:10px;
+  margin:6px 0;
+  display:flex;
+  justify-content:space-between;
+  align-items:center
+}
+.desc{font-size:13px;opacity:.85;margin-top:4px}
+
+.qty{display:flex;align-items:center}
+.qty button{
+  width:30px;height:30px;
+  background:#d32f2f;
+  border:none;color:#fff;
+  font-size:18px;border-radius:6px
+}
+.qty input{
+  width:40px;
+  text-align:center;
+  margin:0 5px;
+  border-radius:6px;
+  border:none
+}
+
+.size button{
+  margin:3px;
+  padding:6px 10px;
+  border:none;
+  border-radius:6px;
+  background:#444;
+  color:#fff;
+  cursor:pointer
+}
+
+input,select{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border-radius:10px;
+  border:none
+}
+
+.total{
+  font-size:22px;
+  text-align:right;
+  margin-top:20px
+}
+.send{
+  width:100%;
+  padding:15px;
+  margin-top:15px;
+  background:#d32f2f;
+  border:none;
+  font-size:18px;
+  color:#fff;
+  border-radius:10px
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<header>
+  <h1>DANBURGER'S</h1>
+  <p>Cardápio Digital</p>
+</header>
+
+<div id="menu"></div>
+
+<h3>Dados do Cliente</h3>
+<input id="nome" placeholder="Nome do cliente">
+<input id="rua" placeholder="Rua / Endereço">
+<input id="numero" placeholder="Número">
+
+<select id="entrega">
+  <option value="0">Retirar no local — Grátis</option>
+  <option value="0">Entrega na cidade — Grátis</option>
+  <option value="7">Entrega fora da cidade — R$7</option>
+</select>
+
+<div class="total">Total: R$ <span id="total">0.00</span></div>
+<button class="send" onclick="enviar()">Enviar Pedido</button>
+
+</div>
+
+<!-- MENUS -->
+<script src="js/menu-gourmet.js"></script>
+<script src="js/menu-pizzas.js"></script>
+<script src="js/menu-esfihas.js"></script>
+<script src="js/menu-lanches.js"></script>
+<script src="js/menu-acrescimos.js"></script>
+<script src="js/menu-beirutes.js"></script>
+<script src="js/menu-parmegiana.js"></script>
+<script src="js/menu-porcoes.js"></script>
+<script src="js/menu-omeletes.js"></script>
+<script src="js/menu-bebidas.js"></script>
+<script src="js/menu-sucos.js"></script>
+
+<script>
+const menu = document.getElementById("menu");
+
+function criarCategoria(titulo, html){
+  const c=document.createElement("div");
+  c.className="category";
+  c.textContent=titulo;
+
+  const list=document.createElement("div");
+  list.className="products";
+  list.innerHTML=html;
+
+  c.onclick=()=>list.style.display=list.style.display==="block"?"none":"block";
+  menu.appendChild(c);
+  menu.appendChild(list);
+}
+
+/* ===== FUNÇÕES ===== */
+function blocoSimples(lista){
+  return lista.map(i=>`
+    <div class="product" data-name="${i.name}" data-price="${i.price}">
+      <div>
+        <strong>${i.name} — R$${i.price.toFixed(2)}</strong>
+        ${i.desc?`<div class="desc">${i.desc}</div>`:""}
+      </div>
+      <div class="qty">
+        <button onclick="q(this,-1)">-</button>
+        <input value="0">
+        <button onclick="q(this,1)">+</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+function blocoPizzas(){
+  return MENU_PIZZAS.map(p=>`
+    <div class="product">
+      <div>
+        <strong>${p.name}</strong>
+        <div class="desc">${p.desc}</div>
+      </div>
+      <div class="size">
+        <button onclick="addPizza('${p.name} P',${p.P})">P R$${p.P}</button>
+        <button onclick="addPizza('${p.name} M',${p.M})">M R$${p.M}</button>
+        <button onclick="addPizza('${p.name} G',${p.G})">G R$${p.G}</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+/* ===== CATEGORIAS ===== */
+criarCategoria("⭐ Linha Gourmet", blocoSimples(MENU_GOURMET));
+
+criarCategoria("🍔 Lanches", blocoSimples([
+  ...MENU_LANCHES.hamburguer,
+  ...MENU_LANCHES.fileMignon,
+  ...MENU_LANCHES.frango,
+  ...MENU_LANCHES.lombo,
+  ...MENU_LANCHES.especiais,
+  ...MENU_LANCHES.prato
+]));
+
+criarCategoria("🍕 Pizzas", blocoPizzas());
+criarCategoria("🥟 Esfihas Salgadas", blocoSimples(MENU_ESFIHAS.salgadas));
+criarCategoria("🍫 Esfihas Doces", blocoSimples(MENU_ESFIHAS.doces));
+criarCategoria("🥪 Beirutes", blocoSimples(MENU_BEIRUTES));
+criarCategoria("🍽️ Parmegiana", blocoSimples(MENU_PARMEGIANA));
+criarCategoria("🍟 Porções", blocoSimples(MENU_PORCOES));
+criarCategoria("🍳 Omeletes", blocoSimples(MENU_OMELETES));
+criarCategoria("🥤 Bebidas", blocoSimples(MENU_BEBIDAS));
+criarCategoria("🧃 Sucos (Copo)", blocoSimples(MENU_SUCOS.copo));
+criarCategoria("🧃 Sucos (Jarra)", blocoSimples(MENU_SUCOS.jarra));
+
+/* ===== CONTROLES ===== */
+function q(btn,v){
+  const i=btn.parentElement.querySelector("input");
+  i.value=Math.max(0,parseInt(i.value)+v);
+  calc();
+}
+
+function addPizza(nome,preco){
+  const div=document.createElement("div");
+  div.className="product";
+  div.dataset.name=nome;
+  div.dataset.price=preco;
+  div.innerHTML=`
+    <div><strong>${nome} — R$${preco.toFixed(2)}</strong></div>
+    <div class="qty">
+      <button onclick="q(this,-1)">-</button>
+      <input value="1">
+      <button onclick="q(this,1)">+</button>
+    </div>`;
+  menu.appendChild(div);
+  calc();
+}
+
+function calc(){
+  let t=0;
+  document.querySelectorAll(".product[data-price]").forEach(p=>{
+    t+=p.dataset.price*p.querySelector("input").value;
+  });
+  t+=parseFloat(entrega.value);
+  total.textContent=t.toFixed(2);
+}
+entrega.onchange=calc;
+
+function enviar(){
+  if(!nome.value||!rua.value||!numero.value){
+    alert("Preencha os dados do cliente");
+    return;
+  }
+  let msg="PEDIDO DANBURGER'S\n\n";
+  document.querySelectorAll(".product[data-price]").forEach(p=>{
+    const q=p.querySelector("input").value;
+    if(q>0) msg+=`${p.dataset.name} x${q}\n`;
+  });
+  msg+=`\nCliente: ${nome.value}`;
+  msg+=`\nEndereço: ${rua.value}, Nº ${numero.value}`;
+  msg+=`\nEntrega: ${entrega.options[entrega.selectedIndex].text}`;
+  msg+=`\nTotal: R$${total.textContent}`;
+
+  window.open("https://wa.me/5577981184890?text="+encodeURIComponent(msg));
+}
+</script>
+
+</body>
+</html>

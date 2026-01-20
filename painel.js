@@ -10,6 +10,7 @@ function salvar(){
   render();
 }
 
+/* ===== CONFIG ===== */
 function salvarConfig(){
   data.config.whatsapp = whatsapp.value.trim();
   data.config.entrega = Number(entrega.value || 0);
@@ -17,38 +18,49 @@ function salvarConfig(){
   alert("Configurações salvas");
 }
 
+/* ===== CATEGORIAS ===== */
 function addCategoria(){
   const nome = catNome.value.trim();
-  if(!nome){
-    alert("Digite o nome da categoria");
-    return;
-  }
-
-  if(data.categorias.includes(nome)){
-    alert("Essa categoria já existe");
-    return;
-  }
+  if(!nome) return alert("Digite o nome da categoria");
+  if(data.categorias.includes(nome)) return alert("Categoria já existe");
 
   data.categorias.push(nome);
-  catNome.value = "";
+  catNome.value="";
   salvar();
 }
 
+function editarCategoria(i){
+  const novo = prompt("Novo nome da categoria:", data.categorias[i]);
+  if(!novo) return;
+
+  const antigo = data.categorias[i];
+  data.categorias[i] = novo;
+
+  data.produtos.forEach(p=>{
+    if(p.categoria === antigo) p.categoria = novo;
+  });
+
+  salvar();
+}
+
+function apagarCategoria(i){
+  if(!confirm("Apagar categoria e seus produtos?")) return;
+
+  const nome = data.categorias[i];
+  data.categorias.splice(i,1);
+  data.produtos = data.produtos.filter(p=>p.categoria !== nome);
+
+  salvar();
+}
+
+/* ===== PRODUTOS ===== */
 function togglePizza(){
-  if(ehPizza.checked){
-    precosPizza.style.display="block";
-    precoNormal.style.display="none";
-  }else{
-    precosPizza.style.display="none";
-    precoNormal.style.display="block";
-  }
+  precosPizza.style.display = ehPizza.checked ? "block" : "none";
+  precoNormal.style.display = ehPizza.checked ? "none" : "block";
 }
 
 function addProduto(){
-  if(!produtoNome.value.trim()){
-    alert("Digite o nome do produto");
-    return;
-  }
+  if(!produtoNome.value.trim()) return alert("Nome do produto obrigatório");
 
   let produto = {
     categoria: produtoCategoria.value,
@@ -79,26 +91,62 @@ function addProduto(){
   salvar();
 }
 
+function editarProduto(i){
+  const p = data.produtos[i];
+  const nome = prompt("Nome:", p.nome);
+  if(!nome) return;
+
+  p.nome = nome;
+  p.desc = prompt("Descrição:", p.desc) || p.desc;
+
+  if(p.pizza){
+    p.P = Number(prompt("Preço P:", p.P));
+    p.M = Number(prompt("Preço M:", p.M));
+    p.G = Number(prompt("Preço G:", p.G));
+  }else{
+    p.preco = Number(prompt("Preço:", p.preco));
+  }
+
+  salvar();
+}
+
+function apagarProduto(i){
+  if(confirm("Apagar produto?")){
+    data.produtos.splice(i,1);
+    salvar();
+  }
+}
+
+/* ===== RENDER ===== */
 function render(){
-  // Atualiza select de categorias
-  produtoCategoria.innerHTML = "";
-  data.categorias.forEach(c=>{
-    const opt = document.createElement("option");
-    opt.value = c;
-    opt.textContent = c;
-    produtoCategoria.appendChild(opt);
+  /* Categorias */
+  listaCategorias.innerHTML="";
+  produtoCategoria.innerHTML="";
+
+  data.categorias.forEach((c,i)=>{
+    listaCategorias.innerHTML += `
+      <div class="product">
+        <b>${c}</b>
+        <button onclick="editarCategoria(${i})">Editar</button>
+        <button onclick="apagarCategoria(${i})">Excluir</button>
+      </div>`;
+
+    produtoCategoria.innerHTML += `<option>${c}</option>`;
   });
 
-  // Lista produtos
+  /* Produtos */
   listaProdutos.innerHTML="";
-  data.produtos.forEach(p=>{
+  data.produtos.forEach((p,i)=>{
     listaProdutos.innerHTML += `
       <div class="product">
-        <b>${p.nome}</b> — ${p.categoria}
+        <b>${p.nome}</b> — ${p.categoria}<br>
         ${p.pizza
-          ? `(Pizza P:${p.P} M:${p.M} G:${p.G})`
-          : `(R$ ${p.preco.toFixed(2)})`
+          ? `Pizza (P:${p.P} M:${p.M} G:${p.G})`
+          : `R$ ${p.preco.toFixed(2)}`
         }
+        <br>
+        <button onclick="editarProduto(${i})">Editar</button>
+        <button onclick="apagarProduto(${i})">Excluir</button>
       </div>`;
   });
 

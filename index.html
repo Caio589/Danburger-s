@@ -49,16 +49,6 @@ header h1{color:#ffd700}
   border:none
 }
 
-.size button{
-  margin:3px;
-  padding:6px 10px;
-  border:none;
-  border-radius:6px;
-  background:#444;
-  color:#fff;
-  cursor:pointer
-}
-
 input,select{
   width:100%;
   padding:12px;
@@ -113,10 +103,8 @@ input,select{
 
 <!-- MENUS -->
 <script src="js/menu-gourmet.js"></script>
-<script src="js/menu-pizzas.js"></script>
-<script src="js/menu-esfihas.js"></script>
 <script src="js/menu-lanches.js"></script>
-<script src="js/menu-acrescimos.js"></script>
+<script src="js/menu-esfihas.js"></script>
 <script src="js/menu-beirutes.js"></script>
 <script src="js/menu-parmegiana.js"></script>
 <script src="js/menu-porcoes.js"></script>
@@ -125,105 +113,99 @@ input,select{
 <script src="js/menu-sucos.js"></script>
 
 <script>
-const menu = document.getElementById("menu");
+document.addEventListener("DOMContentLoaded", ()=>{
 
-/* ===== UTIL ===== */
-function categoria(titulo){
-  const c=document.createElement("div");
-  c.className="category";
-  c.textContent=titulo;
-  const p=document.createElement("div");
-  p.className="products";
-  c.onclick=()=>p.style.display=p.style.display==="block"?"none":"block";
-  menu.appendChild(c);
-  menu.appendChild(p);
-  return p;
-}
+  const menu = document.getElementById("menu");
 
-function item(i){
-  const preco = Number(i.price || 0);
-  return `
-  <div class="product" data-name="${i.name}" data-price="${preco}">
-    <div>
-      <strong>${i.name}${preco ? ` — R$${preco.toFixed(2)}` : ""}</strong>
-      ${i.desc ? `<div class="desc">${i.desc}</div>` : ""}
-    </div>
-    <div class="qty">
-      <button onclick="q(this,-1)">-</button>
-      <input value="0">
-      <button onclick="q(this,1)">+</button>
-    </div>
-  </div>`;
-}
+  function categoria(titulo){
+    const c=document.createElement("div");
+    c.className="category";
+    c.textContent=titulo;
+    const p=document.createElement("div");
+    p.className="products";
+    c.onclick=()=>p.style.display=p.style.display==="block"?"none":"block";
+    menu.appendChild(c);
+    menu.appendChild(p);
+    return p;
+  }
 
-/* ===== LINHA GOURMET ===== */
-let p = categoria("⭐ Linha Gourmet");
-MENU_GOURMET.forEach(i=>p.innerHTML+=item(i));
+  function item(i){
+    const preco = Number(i.price || 0);
+    return `
+    <div class="product" data-name="${i.name}" data-price="${preco}">
+      <div>
+        <strong>${i.name}${preco ? ` — R$${preco.toFixed(2)}` : ""}</strong>
+        ${i.desc ? `<div class="desc">${i.desc}</div>` : ""}
+      </div>
+      <div class="qty">
+        <button onclick="q(this,-1)">-</button>
+        <input value="0">
+        <button onclick="q(this,1)">+</button>
+      </div>
+    </div>`;
+  }
 
-/* ===== LANCHES ===== */
-p = categoria("🍔 Lanches");
-[
-  ...MENU_LANCHES.hamburguer,
-  ...MENU_LANCHES.fileMignon,
-  ...MENU_LANCHES.frango,
-  ...MENU_LANCHES.lombo,
-  ...MENU_LANCHES.especiais,
-  ...MENU_LANCHES.prato
-].forEach(i=>p.innerHTML+=item(i));
+  if (window.MENU_GOURMET){
+    let p=categoria("⭐ Linha Gourmet");
+    MENU_GOURMET.forEach(i=>p.innerHTML+=item(i));
+  }
 
- ===== PIZZAS ===== */
-/*p = categoria("🍕 Pizzas");
-MENU_PIZZAS.forEach(pz=>{
-  p.innerHTML+=`
-  <div class="product">
-    <div>
-      <strong>${pz.name}</strong>
-      <div class="desc">${pz.desc}</div>
-    </div>
-    <div class="size">
-      <button onclick="addPizza('${pz.name} P',${pz.P})">P ${pz.P}</button>
-      <button onclick="addPizza('${pz.name} M',${pz.M})">M ${pz.M}</button>
-      <button onclick="addPizza('${pz.name} G',${pz.G})">G ${pz.G}</button>
-    </div>
-  </div>`;
+  if (window.MENU_LANCHES){
+    let p=categoria("🍔 Lanches");
+    [
+      ...MENU_LANCHES.hamburguer,
+      ...MENU_LANCHES.fileMignon,
+      ...MENU_LANCHES.frango,
+      ...MENU_LANCHES.lombo,
+      ...MENU_LANCHES.especiais,
+      ...MENU_LANCHES.prato
+    ].forEach(i=>p.innerHTML+=item(i));
+  }
+
+  if (window.MENU_ESFIHAS){
+    let p=categoria("🥟 Esfihas Salgadas");
+    MENU_ESFIHAS.salgadas.forEach(i=>p.innerHTML+=item(i));
+    p=categoria("🍫 Esfihas Doces");
+    MENU_ESFIHAS.doces.forEach(i=>p.innerHTML+=item(i));
+  }
+
+  if (window.MENU_BEIRUTES){
+    let p=categoria("🥪 Beirutes");
+    MENU_BEIRUTES.forEach(i=>p.innerHTML+=item(i));
+  }
+
+  if (window.MENU_PARMEGIANA){
+    let p=categoria("🍽️ Parmegiana");
+    MENU_PARMEGIANA.forEach(i=>p.innerHTML+=item(i));
+  }
+
+  if (window.MENU_PORCOES){
+    let p=categoria("🍟 Porções");
+    MENU_PORCOES.forEach(i=>p.innerHTML+=item(i));
+  }
+
+  if (window.MENU_OMELETES){
+    let p=categoria("🍳 Omeletes");
+    MENU_OMELETES.forEach(i=>p.innerHTML+=item(i));
+  }
+
+  if (window.MENU_BEBIDAS){
+    let p=categoria("🥤 Bebidas");
+    MENU_BEBIDAS.forEach(i=>p.innerHTML+=item(i));
+  }
+
+  if (window.MENU_SUCOS){
+    let p=categoria("🧃 Sucos (Copo)");
+    MENU_SUCOS.copo.forEach(i=>p.innerHTML+=item(i));
+    p=categoria("🧃 Sucos (Jarra)");
+    MENU_SUCOS.jarra.forEach(i=>p.innerHTML+=item(i));
+  }
+
 });
 
-/* ===== ESFIHAS ===== */
-p = categoria("🥟 Esfihas Salgadas");
-MENU_ESFIHAS.salgadas.forEach(i=>p.innerHTML+=item(i));
-
-p = categoria("🍫 Esfihas Doces");
-MENU_ESFIHAS.doces.forEach(i=>p.innerHTML+=item(i));
-
-/* ===== OUTROS ===== */
-p = categoria("🥪 Beirutes"); MENU_BEIRUTES.forEach(i=>p.innerHTML+=item(i));
-p = categoria("🍽️ Parmegiana"); MENU_PARMEGIANA.forEach(i=>p.innerHTML+=item(i));
-p = categoria("🍟 Porções"); MENU_PORCOES.forEach(i=>p.innerHTML+=item(i));
-p = categoria("🍳 Omeletes"); MENU_OMELETES.forEach(i=>p.innerHTML+=item(i));
-p = categoria("🥤 Bebidas"); MENU_BEBIDAS.forEach(i=>p.innerHTML+=item(i));
-p = categoria("🧃 Sucos (Copo)"); MENU_SUCOS.copo.forEach(i=>p.innerHTML+=item(i));
-p = categoria("🧃 Sucos (Jarra)"); MENU_SUCOS.jarra.forEach(i=>p.innerHTML+=item(i));
-
-/* ===== CONTROLE ===== */
 function q(btn,v){
   const i=btn.parentElement.querySelector("input");
   i.value=Math.max(0,parseInt(i.value)+v);
-  calc();
-}
-
-function addPizza(n,p){
-  const div=document.createElement("div");
-  div.className="product";
-  div.dataset.name=n;
-  div.dataset.price=p;
-  div.innerHTML=`
-    <div><strong>${n} — R$${p.toFixed(2)}</strong></div>
-    <div class="qty">
-      <button onclick="q(this,-1)">-</button>
-      <input value="1">
-      <button onclick="q(this,1)">+</button>
-    </div>`;
-  menu.appendChild(div);
   calc();
 }
 

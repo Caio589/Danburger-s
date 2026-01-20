@@ -1,7 +1,9 @@
 let data = JSON.parse(localStorage.getItem("cardapio")) || {
   config:{ whatsapp:"", entrega:0 },
   categorias:[],
-  produtos:[]
+  produtos:[],
+  pizzas:[],
+  adicionais:[]
 };
 
 function salvar(){
@@ -13,7 +15,6 @@ function salvarConfig(){
   data.config.whatsapp = whatsapp.value;
   data.config.entrega = Number(entrega.value);
   salvar();
-  alert("Configurações salvas");
 }
 
 function addCategoria(){
@@ -24,8 +25,8 @@ function addCategoria(){
 }
 
 function addProduto(){
-  if(!produtoNome.value) return;
   data.produtos.push({
+    tipo:"normal",
     categoria: produtoCategoria.value,
     nome: produtoNome.value,
     desc: produtoDesc.value,
@@ -37,8 +38,29 @@ function addProduto(){
   salvar();
 }
 
-function del(i){
-  data.produtos.splice(i,1);
+function addPizza(){
+  data.pizzas.push({
+    nome: pizzaNome.value,
+    desc: pizzaDesc.value,
+    P:Number(pizzaP.value),
+    M:Number(pizzaM.value),
+    G:Number(pizzaG.value)
+  });
+  pizzaNome.value="";
+  pizzaDesc.value="";
+  pizzaP.value="";
+  pizzaM.value="";
+  pizzaG.value="";
+  salvar();
+}
+
+function addAdicional(){
+  data.adicionais.push({
+    nome: addNome.value,
+    preco: Number(addPreco.value)
+  });
+  addNome.value="";
+  addPreco.value="";
   salvar();
 }
 
@@ -48,17 +70,21 @@ function render(){
     produtoCategoria.innerHTML += `<option>${c}</option>`;
   });
 
-  listaProdutos.innerHTML="";
-  data.produtos.forEach((p,i)=>{
-    listaProdutos.innerHTML += `
-      <div class="product">
-        <b>${p.nome}</b> (${p.categoria}) - R$ ${p.preco.toFixed(2)}
-        <button onclick="del(${i})">Excluir</button>
-      </div>`;
+  listaProdutos.innerHTML="<h3>Produtos / Pizzas</h3>";
+  data.produtos.forEach(p=>{
+    listaProdutos.innerHTML += `<div>${p.nome} - R$ ${p.preco}</div>`;
+  });
+  data.pizzas.forEach(p=>{
+    listaProdutos.innerHTML += `<div>🍕 ${p.nome} (P:${p.P} M:${p.M} G:${p.G})</div>`;
   });
 
-  whatsapp.value = data.config.whatsapp;
-  entrega.value = data.config.entrega;
+  listaAdicionais.innerHTML="<h3>Adicionais</h3>";
+  data.adicionais.forEach(a=>{
+    listaAdicionais.innerHTML += `<div>${a.nome} - R$ ${a.preco}</div>`;
+  });
+
+  whatsapp.value=data.config.whatsapp;
+  entrega.value=data.config.entrega;
 }
 
 render();

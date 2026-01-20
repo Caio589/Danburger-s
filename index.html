@@ -29,38 +29,20 @@ body{
 <!-- DADOS DO CLIENTE -->
 <h2>👤 Dados do Cliente</h2>
 <input id="nome" placeholder="Nome do cliente">
-<input id="endereco" placeholder="Endereço completo (Rua, Nº, Bairro)">
+<input id="endereco" placeholder="Endereço completo">
 
-<!-- CARDÁPIO -->
-<h2>📋 Cardápio</h2>
+<!-- CARDÁPIO DINÂMICO -->
 <div id="menu"></div>
 
-<!-- TAMANHO DA PIZZA -->
-<h2>🍕 Tamanho da Pizza</h2>
-<select id="pizzaSize" onchange="calcTotal()">
-  <option value="0">Não é pizza</option>
-  <option value="P">Pequena</option>
-  <option value="M">Média</option>
-  <option value="G">Grande</option>
-</select>
-
-<!-- ADICIONAIS -->
-<h2>➕ Adicionais</h2>
-<label><input type="checkbox" value="1" onchange="calcTotal()"> Alface (+R$1)</label><br>
-<label><input type="checkbox" value="2" onchange="calcTotal()"> Ovo (+R$2)</label><br>
-<label><input type="checkbox" value="4" onchange="calcTotal()"> Bacon (+R$4)</label><br>
-<label><input type="checkbox" value="3" onchange="calcTotal()"> Cheddar (+R$3)</label><br>
-<label><input type="checkbox" value="6" onchange="calcTotal()"> Hambúrguer (+R$6)</label>
-
-<!-- ENTREGA -->
-<h2>🚚 Entrega</h2>
-<select id="entrega" onchange="calcTotal()">
-  <option value="0">Retirar no local</option>
+<!-- ENTREGA / RETIRADA -->
+<h2>🚚 Entrega ou Retirada</h2>
+<select id="entrega" onchange="atualizarTotal()">
+  <option value="0">Retirar no local (Grátis)</option>
 </select>
 
 <!-- PAGAMENTO -->
 <h2>💳 Pagamento</h2>
-<select id="pagamento" onchange="trocoToggle()">
+<select id="pagamento" onchange="toggleTroco()">
   <option value="Pix">Pix</option>
   <option value="Dinheiro">Dinheiro</option>
   <option value="Débito">Cartão Débito</option>

@@ -1,93 +1,117 @@
 const data = JSON.parse(localStorage.getItem("cardapio"));
 const menu = document.getElementById("menu");
+
 let total = 0;
 let pedido = [];
 
 if(!data){
-  menu.innerHTML="Cadastre no painel.";
+  menu.innerHTML = "Cadastre os produtos no painel.";
 }else{
 
-  // Produtos normais
+  // ========= PRODUTOS NORMAIS =========
   data.categorias.forEach(cat=>{
-    const c=document.createElement("div");
-    c.className="category";
-    c.innerText=cat;
-    const p=document.createElement("div");
-    p.className="products";
-    c.onclick=()=>p.style.display=p.style.display==="block"?"none":"block";
+    const c = document.createElement("div");
+    c.className = "category";
+    c.innerText = cat;
 
-    data.produtos.filter(x=>x.categoria===cat).forEach(i=>{
-      p.innerHTML+=`
-        <div class="product">
-          <b>${i.nome}</b>
-          <div class="desc">${i.desc}</div>
-          <div class="price">R$ ${i.preco.toFixed(2)}</div>
-          <button onclick="add(${i.preco},'${i.nome}')">Adicionar</button>
-        </div>`;
-    });
+    const p = document.createElement("div");
+    p.className = "products";
+    c.onclick = ()=> p.style.display = p.style.display==="block" ? "none" : "block";
+
+    data.produtos
+      .filter(x => x.categoria === cat)
+      .forEach(i=>{
+        p.innerHTML += `
+          <div class="product">
+            <b>${i.nome}</b>
+            <div class="desc">${i.desc}</div>
+            <div class="price">R$ ${i.preco.toFixed(2)}</div>
+            <button onclick="addItem(${i.preco}, '${i.nome}')">Adicionar</button>
+          </div>`;
+      });
 
     menu.appendChild(c);
     menu.appendChild(p);
   });
 
-  // Pizzas
-  const cp=document.createElement("div");
-  cp.className="category";
-  cp.innerText="🍕 Pizzas";
-  const pp=document.createElement("div");
-  pp.className="products";
-  cp.onclick=()=>pp.style.display=pp.style.display==="block"?"none":"block";
+  // ========= PIZZAS (SÓ SE EXISTIREM) =========
+  if(data.pizzas && data.pizzas.length > 0){
+    const cp = document.createElement("div");
+    cp.className = "category";
+    cp.innerText = "🍕 Pizzas";
 
-  data.pizzas.forEach(p=>{
-    pp.innerHTML+=`
-      <div class="product">
-        <b>${p.nome}</b>
-        <div class="desc">${p.desc}</div>
-        <select onchange="add(this.value,'Pizza ${p.nome}')">
-          <option value="0">Escolher tamanho</option>
-          <option value="${p.P}">P - R$ ${p.P}</option>
-          <option value="${p.M}">M - R$ ${p.M}</option>
-          <option value="${p.G}">G - R$ ${p.G}</option>
-        </select>
-      </div>`;
-  });
+    const pp = document.createElement("div");
+    pp.className = "products";
+    cp.onclick = ()=> pp.style.display = pp.style.display==="block" ? "none" : "block";
 
-  menu.appendChild(cp);
-  menu.appendChild(pp);
+    data.pizzas.forEach(pz=>{
+      pp.innerHTML += `
+        <div class="product">
+          <b>${pz.nome}</b>
+          <div class="desc">${pz.desc}</div>
+          <select onchange="addPizza(this, '${pz.nome}')">
+            <option value="">Escolher tamanho</option>
+            ${pz.P ? `<option value="${pz.P}">P - R$ ${pz.P}</option>` : ``}
+            ${pz.M ? `<option value="${pz.M}">M - R$ ${pz.M}</option>` : ``}
+            ${pz.G ? `<option value="${pz.G}">G - R$ ${pz.G}</option>` : ``}
+          </select>
+        </div>`;
+    });
 
-  // Adicionais
-  const ad=document.createElement("div");
-  ad.innerHTML="<h2>Adicionais</h2>";
-  data.adicionais.forEach(a=>{
-    ad.innerHTML+=`
-      <label>
-        <input type="checkbox" value="${a.preco}" onchange="toggleAdd(this,'${a.nome}')">
-        ${a.nome} (+R$ ${a.preco})
-      </label><br>`;
-  });
-  menu.appendChild(ad);
+    menu.appendChild(cp);
+    menu.appendChild(pp);
+  }
 
-  entrega.innerHTML+=`<option value="${data.config.entrega}">Entrega (+R$ ${data.config.entrega})</option>`;
+  // ========= ADICIONAIS (SÓ SE EXISTIREM) =========
+  if(data.adicionais && data.adicionais.length > 0){
+    const ad = document.createElement("div");
+    ad.innerHTML = "<h2>➕ Adicionais</h2>";
+
+    data.adicionais.forEach(a=>{
+      ad.innerHTML += `
+        <label>
+          <input type="checkbox" value="${a.preco}" onchange="toggleAdd(this,'${a.nome}')">
+          ${a.nome} (+R$ ${a.preco})
+        </label><br>`;
+    });
+
+    menu.appendChild(ad);
+  }
+
+  // ========= ENTREGA =========
+  entrega.innerHTML += `
+    <option value="${data.config.entrega}">
+      Entrega (+R$ ${data.config.entrega.toFixed(2)})
+    </option>`;
 }
 
-function add(v,n){
-  if(v>0){
-    total+=Number(v);
-    pedido.push(n);
+// ========= FUNÇÕES =========
+
+function addItem(valor, nome){
+  total += Number(valor);
+  pedido.push(nome);
+  atualizar();
+}
+
+function addPizza(select, nome){
+  if(select.value){
+    total += Number(select.value);
+    pedido.push(`Pizza ${nome}`);
+    select.disabled = true; // evita somar duas vezes
     atualizar();
   }
 }
 
-function toggleAdd(el,n){
+function toggleAdd(el, nome){
   if(el.checked){
-    total+=Number(el.value);
-    pedido.push(n);
+    total += Number(el.value);
+    pedido.push(nome);
   }else{
-    total-=Number(el.value);
+    total -= Number(el.value);
   }
   atualizar();
 }
 
 function atualizar(){
-  document.getElementById("total").innerText=total.toFixed(2);
+  document.getElementById("total").innerText = total.toFixed(2);
 }

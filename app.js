@@ -1,6 +1,36 @@
-const data = JSON.parse(localStorage.getItem("cardapio"));
-const menu = document.getElementById("menu");
+/*const data = JSON.parse(localStorage.getItem("cardapio"));
+const menu = document.getElementById("menu");*/
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
+const supabaseUrl = 'SEU_PROJECT_URL'
+const supabaseKey = 'SUA_ANON_KEY'
+const supabase = createClient(supabaseUrl, supabaseKey)
+
+async function carregarProdutos() {
+  const { data, error } = await supabase
+    .from('produtos')
+    .select('*')
+    .order('nome')
+
+  if (error) {
+    console.error(error)
+    return
+  }
+
+  const menu = document.getElementById('menu')
+  menu.innerHTML = ''
+
+  data.forEach(produto => {
+    menu.innerHTML += `
+      <div class="produto">
+        <h3>${produto.nome}</h3>
+        <p>R$ ${Number(produto.preco).toFixed(2)}</p>
+      </div>
+    `
+  })
+}
+
+carregarProdutos()
 let total = 0;
 let pedido = [];
 

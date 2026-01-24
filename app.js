@@ -2,8 +2,8 @@
 const menu = document.getElementById("menu");*/
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-const supabaseUrl = 'SEU_PROJECT_URL'
-const supabaseKey = 'SUA_ANON_KEY'
+const supabaseUrl = 'https://lrngbekbptzjplyanzfu.supabase.co'
+const supabaseKey = 'sb_publishable_V3zBtqHmGtWu_kz83QEVIQ_bWxPxiqm'
 const supabase = createClient(supabaseUrl, supabaseKey)
 
 async function carregarProdutos() {

@@ -1,45 +1,19 @@
-const form = document.getElementById("form-produto")
-const lista = document.getElementById("lista-admin")
+import { criarProduto } from "./data.js"
 
-form.addEventListener("submit", e => {
+const form = document.getElementById("form-produto")
+
+form.addEventListener("submit", async e => {
   e.preventDefault()
 
-  const nome = form.nome.value
-  const descricao = form.descricao.value
-  const preco = Number(form.preco.value)
-  const categoria = form.categoria.value
-
-  produtos.push({
-    id: Date.now(),
-    nome,
-    descricao,
-    preco,
-    categoria,
+  const produto = {
+    nome: form.nome.value,
+    descricao: form.descricao.value,
+    preco: Number(form.preco.value),
+    categoria: form.categoria.value,
     ativo: true
-  })
+  }
 
-  salvarProdutos()
+  await criarProduto(produto)
+  alert("Produto cadastrado!")
   form.reset()
-  renderizarAdmin()
 })
-
-function renderizarAdmin() {
-  lista.innerHTML = ""
-
-  produtos.forEach(p => {
-    lista.innerHTML += `
-      <div class="card">
-        <strong>${p.nome}</strong> - R$ ${p.preco}
-        <button onclick="remover(${p.id})">❌</button>
-      </div>
-    `
-  })
-}
-
-function remover(id) {
-  produtos = produtos.filter(p => p.id !== id)
-  salvarProdutos()
-  renderizarAdmin()
-}
-
-renderizarAdmin()

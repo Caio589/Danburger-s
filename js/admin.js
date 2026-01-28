@@ -8,21 +8,21 @@ document.addEventListener("DOMContentLoaded", () => {
   const listaProdutos = document.getElementById("lista-produtos")
   const selectCategoria = document.getElementById("categoriaProduto")
 
+  const campoPrecoNormal = document.getElementById("campo-preco-normal")
+  const campoPizza = document.getElementById("campo-pizza")
+
   const btnCriarCategoria = document.getElementById("btnCriarCategoria")
   const btnCriarProduto = document.getElementById("btnCriarProduto")
 
-  // =========================
-  // 🔹 CATEGORIAS
-  // =========================
+  // ======================
+  // CATEGORIAS
+  // ======================
   async function carregarCategorias() {
     const { data, error } = await supabase
       .from("categorias")
       .select("*")
 
-    if (error || !Array.isArray(data)) {
-      console.error("Erro categorias:", error)
-      return
-    }
+    if (error || !Array.isArray(data)) return
 
     listaCategorias.innerHTML = ""
     selectCategoria.innerHTML = `<option value="">Selecione a categoria</option>`
@@ -32,68 +32,18 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="card">
           <b>${c.nome}</b>
           <div class="acoes">
-            <button class="btn editar"
-              data-id="${c.id}"
-              data-nome="${c.nome}">
-              ✏️ Editar
-            </button>
-
-            <button class="btn excluir"
-              data-id="${c.id}">
-              🗑️ Excluir
-            </button>
+            <button class="btn excluir" data-id="${c.id}">🗑️</button>
           </div>
         </div>
       `
-
-      selectCategoria.innerHTML += `
-        <option value="${c.nome}">${c.nome}</option>
-      `
+      selectCategoria.innerHTML += `<option value="${c.nome}">${c.nome}</option>`
     })
 
-    // ✏️ EDITAR CATEGORIA
-    document.querySelectorAll("#lista-categorias .btn.editar").forEach(btn => {
-      btn.onclick = async () => {
-        const id = btn.dataset.id
-        const nomeAtual = btn.dataset.nome
-        const novoNome = prompt("Novo nome da categoria:", nomeAtual)
-        if (!novoNome) return
-
-        const { error } = await supabase
-          .from("categorias")
-          .update({ nome: novoNome })
-          .eq("id", id)
-
-        if (error) {
-          alert("Erro ao editar categoria")
-          console.error(error)
-          return
-        }
-
-        carregarCategorias()
-        carregarProdutos()
-      }
-    })
-
-    // 🗑️ EXCLUIR CATEGORIA (DELETE REAL)
     document.querySelectorAll("#lista-categorias .btn.excluir").forEach(btn => {
       btn.onclick = async () => {
-        const id = btn.dataset.id
-        if (!confirm("Excluir categoria DEFINITIVAMENTE?")) return
-
-        const { error } = await supabase
-          .from("categorias")
-          .delete()
-          .eq("id", id)
-
-        if (error) {
-          alert("Erro ao excluir categoria")
-          console.error(error)
-          return
-        }
-
+        if (!confirm("Excluir categoria?")) return
+        await supabase.from("categorias").delete().eq("id", btn.dataset.id)
         carregarCategorias()
-        carregarProdutos()
       }
     })
   }
@@ -102,107 +52,51 @@ document.addEventListener("DOMContentLoaded", () => {
     const nome = document.getElementById("novaCategoria").value.trim()
     if (!nome) return alert("Digite o nome da categoria")
 
-    const { error } = await supabase
-      .from("categorias")
-      .insert({ nome })
-
-    if (error) {
-      alert("Erro ao criar categoria")
-      console.error(error)
-      return
-    }
-
+    await supabase.from("categorias").insert({ nome })
     document.getElementById("novaCategoria").value = ""
     carregarCategorias()
   }
 
-  // =========================
-  // 🔹 PRODUTOS
-  // =========================
+  // ======================
+  // MOSTRAR CAMPOS PIZZA
+  // ======================
+  selectCategoria.addEventListener("change", () => {
+    if (selectCategoria.value.toLowerCase() === "pizza") {
+      campoPrecoNormal.style.display = "none"
+      campoPizza.style.display = "block"
+    } else {
+      campoPrecoNormal.style.display = "block"
+      campoPizza.style.display = "none"
+    }
+  })
+
+  // ======================
+  // PRODUTOS
+  // ======================
   async function carregarProdutos() {
     const { data, error } = await supabase
       .from("produtos")
       .select("*")
 
-    if (error || !Array.isArray(data)) {
-      console.error("Erro produtos:", error)
-      return
-    }
+    if (error || !Array.isArray(data)) return
 
     listaProdutos.innerHTML = ""
 
     data.forEach(p => {
       listaProdutos.innerHTML += `
         <div class="card">
-          <b>${p.nome}</b> — ${p.categoria} — R$ ${p.preco}
+          <b>${p.nome}</b> — ${p.categoria}
           <div class="acoes">
-            <button class="btn editar"
-              data-id="${p.id}"
-              data-nome="${p.nome}"
-              data-descricao="${p.descricao || ""}"
-              data-preco="${p.preco}"
-              data-categoria="${p.categoria}">
-              ✏️ Editar
-            </button>
-
-            <button class="btn excluir"
-              data-id="${p.id}">
-              🗑️ Excluir
-            </button>
+            <button class="btn excluir" data-id="${p.id}">🗑️</button>
           </div>
         </div>
       `
     })
 
-    // ✏️ EDITAR PRODUTO
-    document.querySelectorAll("#lista-produtos .btn.editar").forEach(btn => {
-      btn.onclick = async () => {
-        const id = btn.dataset.id
-
-        const nome = prompt("Nome:", btn.dataset.nome)
-        const descricao = prompt("Descrição:", btn.dataset.descricao)
-        const preco = prompt("Preço:", btn.dataset.preco)
-        const categoria = prompt("Categoria:", btn.dataset.categoria)
-
-        if (!nome || !preco || !categoria) return
-
-        const { error } = await supabase
-          .from("produtos")
-          .update({
-            nome,
-            descricao,
-            preco,
-            categoria
-          })
-          .eq("id", id)
-
-        if (error) {
-          alert("Erro ao editar produto")
-          console.error(error)
-          return
-        }
-
-        carregarProdutos()
-      }
-    })
-
-    // 🗑️ EXCLUIR PRODUTO (DELETE REAL)
     document.querySelectorAll("#lista-produtos .btn.excluir").forEach(btn => {
       btn.onclick = async () => {
-        const id = btn.dataset.id
-        if (!confirm("Excluir produto DEFINITIVAMENTE?")) return
-
-        const { error } = await supabase
-          .from("produtos")
-          .delete()
-          .eq("id", id)
-
-        if (error) {
-          alert("Erro ao excluir produto")
-          console.error(error)
-          return
-        }
-
+        if (!confirm("Excluir produto?")) return
+        await supabase.from("produtos").delete().eq("id", btn.dataset.id)
         carregarProdutos()
       }
     })
@@ -211,37 +105,53 @@ document.addEventListener("DOMContentLoaded", () => {
   btnCriarProduto.onclick = async () => {
     const nome = document.getElementById("nomeProduto").value.trim()
     const descricao = document.getElementById("descricaoProduto").value.trim()
-    const preco = Number(document.getElementById("precoProduto").value)
     const categoria = selectCategoria.value
 
-    if (!nome || !preco || !categoria) {
-      alert("Preencha nome, preço e categoria")
+    const preco = document.getElementById("precoProduto").value
+    const preco_p = document.getElementById("precoP").value
+    const preco_m = document.getElementById("precoM").value
+    const preco_g = document.getElementById("precoG").value
+
+    if (!nome || !categoria) {
+      alert("Preencha nome e categoria")
       return
     }
 
-    const { error } = await supabase
-      .from("produtos")
-      .insert({
-        nome,
-        descricao,
-        preco,
-        categoria
-      })
+    let dados = { nome, descricao, categoria }
 
-    if (error) {
-      alert("Erro ao criar produto")
-      console.error(error)
-      return
+    if (categoria.toLowerCase() === "pizza") {
+      if (!preco_p || !preco_m || !preco_g) {
+        alert("Preencha P / M / G")
+        return
+      }
+      dados.preco_p = preco_p
+      dados.preco_m = preco_m
+      dados.preco_g = preco_g
+      dados.preco = null
+    } else {
+      if (!preco) {
+        alert("Preencha o preço")
+        return
+      }
+      dados.preco = preco
+      dados.preco_p = null
+      dados.preco_m = null
+      dados.preco_g = null
     }
+
+    await supabase.from("produtos").insert(dados)
 
     document.getElementById("nomeProduto").value = ""
     document.getElementById("descricaoProduto").value = ""
     document.getElementById("precoProduto").value = ""
+    document.getElementById("precoP").value = ""
+    document.getElementById("precoM").value = ""
+    document.getElementById("precoG").value = ""
 
     carregarProdutos()
   }
 
-  // 🚀 START
+  // START
   carregarCategorias()
   carregarProdutos()
 })

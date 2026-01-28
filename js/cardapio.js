@@ -4,10 +4,12 @@ const categoriasEl = document.getElementById("categorias")
 const listaProdutos = document.getElementById("lista-produtos")
 const resumoEl = document.getElementById("resumo")
 const totalEl = document.getElementById("total")
+const entregaSelect = document.getElementById("entrega")
 
 let produtos = []
 let carrinho = []
 let categoriaAtual = "Todos"
+let frete = 0
 
 // ==========================
 // START
@@ -56,6 +58,7 @@ async function carregarProdutos() {
   const { data, error } = await supabase
     .from("produtos")
     .select("*")
+    .eq("ativo", true)
 
   if (error || !Array.isArray(data)) return
   produtos = data
@@ -84,12 +87,15 @@ function renderizarProdutos() {
 // PRODUTO NORMAL
 // ==========================
 function renderizarProdutoNormal(p) {
+  if (p.preco == null) return
+
   listaProdutos.innerHTML += `
     <div class="card">
       <h3>${p.nome}</h3>
       <p>${p.descricao || ""}</p>
       <div class="preco">R$ ${Number(p.preco).toFixed(2)}</div>
-      <button class="btn btn-add" onclick='addCarrinho("${p.nome}", ${p.preco})'>
+      <button class="btn btn-add"
+        onclick='addCarrinho("${p.nome}", ${Number(p.preco)})'>
         Adicionar
       </button>
     </div>
@@ -97,12 +103,10 @@ function renderizarProdutoNormal(p) {
 }
 
 // ==========================
-// PIZZA COM TAMANHOS
+// PIZZA (P / M / G)
 // ==========================
 function renderizarPizza(p) {
-  if (p.preco_p == null || p.preco_m == null || p.preco_g == null) {
-    return
-  }
+  if (p.preco_p == null || p.preco_m == null || p.preco_g == null) return
 
   listaProdutos.innerHTML += `
     <div class="card">
@@ -137,18 +141,39 @@ window.addCarrinho = (nome, preco) => {
 
 function renderizarCarrinho() {
   resumoEl.innerHTML = ""
-  let total = 0
+  let subtotal = 0
 
   carrinho.forEach(item => {
     resumoEl.innerHTML += `<p>${item.nome} — R$ ${item.preco.toFixed(2)}</p>`
-    total += item.preco
+    subtotal += item.preco
   })
 
+  // FRETE
+  if (entregaSelect && entregaSelect.value === "fora") {
+    frete = 7
+  } else {
+    frete = 0
+  }
+
+  if (frete > 0) {
+    resumoEl.innerHTML += `<p>🚗 Frete — R$ ${frete.toFixed(2)}</p>`
+  }
+
+  const total = subtotal + frete
   totalEl.innerText = `Total: R$ ${total.toFixed(2)}`
 }
 
 // ==========================
-// ENVIAR WHATSAPP
+// ATUALIZA AO TROCAR ENTREGA
+// ==========================
+if (entregaSelect) {
+  entregaSelect.addEventListener("change", () => {
+    renderizarCarrinho()
+  })
+}
+
+// ==========================
+// WHATSAPP
 // ==========================
 window.enviarPedido = () => {
   if (carrinho.length === 0) {
@@ -157,12 +182,20 @@ window.enviarPedido = () => {
   }
 
   let mensagem = "🧾 *Pedido DanBurgers*%0A%0A"
+  let subtotal = 0
+
   carrinho.forEach(i => {
     mensagem += `• ${i.nome} - R$ ${i.preco.toFixed(2)}%0A`
+    subtotal += i.preco
   })
 
-  mensagem += `%0A${totalEl.innerText}`
+  if (frete > 0) {
+    mensagem += `🚗 Frete: R$ ${frete.toFixed(2)}%0A`
+  }
 
-  const numero = "5511963266825" // SEU WHATS
+  const total = subtotal + frete
+  mensagem += `%0A💰 Total: R$ ${total.toFixed(2)}`
+
+  const numero = "5511963266825" // seu WhatsApp
   window.open(`https://wa.me/${numero}?text=${mensagem}`)
 }

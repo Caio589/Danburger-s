@@ -23,12 +23,17 @@
     <div class="card">
       <h3>🍔 Produtos</h3>
 
-      <input id="nome" placeholder="Nome do produto">
-      <input id="descricao" placeholder="Descrição">
-      <input id="preco" type="number" placeholder="Preço">
-      <select id="categoriaProduto"></select>
+      <input id="nomeProduto" placeholder="Nome do produto">
+      <input id="descricaoProduto" placeholder="Descrição">
+      <input id="precoProduto" type="number" placeholder="Preço">
+
+      <!-- SELECT DE CATEGORIAS (IMPORTANTE) -->
+      <select id="categoriaProduto">
+        <option value="">Selecione a categoria</option>
+      </select>
 
       <button class="btn" onclick="criarProduto()">Adicionar produto</button>
+
       <div id="lista-produtos"></div>
     </div>
   </div>

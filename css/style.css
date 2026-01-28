@@ -14,9 +14,12 @@ body {
   font-family: 'Poppins', sans-serif;
 
   /* FUNDO COM FOTO DE HAMBÚRGUER */
-  background-image:
-    linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.85)),
-    url("https://images.unsplash.com/photo-1568901346375-23c9450c58cd");
+ background-image:
+  linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.85)),
+  url("../assets/fundo.jpg");
+background-image:
+  linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.85)),
+  url("../assets/fundo.jpg");
 
   background-size: cover;
   background-position: center;

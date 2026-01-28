@@ -1,28 +1,32 @@
 import { supabase } from "./supabase.js"
 
-// ELEMENTOS
+/* =======================
+   ELEMENTOS (BLINDADOS)
+======================= */
 const categoriasEl = document.getElementById("categorias")
 const listaProdutos = document.getElementById("lista-produtos")
 const resumoEl = document.getElementById("resumo")
 const totalEl = document.getElementById("total")
 
-const entregaSelect = document.getElementById("entrega")
-const pagamentoSelect = document.getElementById("pagamento")
-const trocoInput = document.getElementById("troco")
+const entregaSelect = document.getElementById("entrega") || { value: "retirada" }
+const pagamentoSelect = document.getElementById("pagamento") || { value: "" }
+const trocoInput = document.getElementById("troco") || { value: "", style: {} }
 
-const nomeInput = document.getElementById("nomeCliente")
-const telefoneInput = document.getElementById("telefoneCliente")
-const enderecoInput = document.getElementById("enderecoCliente")
+const nomeInput = document.getElementById("nomeCliente") || { value: "" }
+const telefoneInput = document.getElementById("telefoneCliente") || { value: "" }
+const enderecoInput = document.getElementById("enderecoCliente") || { value: "" }
 
-// VARIÁVEIS
+/* =======================
+   VARIÁVEIS
+======================= */
 let produtos = []
 let carrinho = []
 let categoriaAtual = "Todos"
 let frete = 0
 
-// ======================
-// START
-// ======================
+/* =======================
+   START
+======================= */
 async function iniciar() {
   await carregarCategorias()
   await carregarProdutos()
@@ -31,30 +35,36 @@ async function iniciar() {
 }
 iniciar()
 
-// ======================
-// MOSTRAR TROCO
-// ======================
-pagamentoSelect.addEventListener("change", () => {
-  if (pagamentoSelect.value === "dinheiro") {
-    trocoInput.style.display = "block"
-  } else {
-    trocoInput.style.display = "none"
-    trocoInput.value = ""
-  }
-})
+/* =======================
+   TROCO DINHEIRO
+======================= */
+if (pagamentoSelect.addEventListener) {
+  pagamentoSelect.addEventListener("change", () => {
+    if (pagamentoSelect.value === "dinheiro") {
+      trocoInput.style.display = "block"
+    } else {
+      trocoInput.style.display = "none"
+      trocoInput.value = ""
+    }
+  })
+}
 
-// ======================
-// ATUALIZAR FRETE
-// ======================
-entregaSelect.addEventListener("change", () => {
-  renderizarCarrinho()
-})
+/* =======================
+   ENTREGA
+======================= */
+if (entregaSelect.addEventListener) {
+  entregaSelect.addEventListener("change", () => {
+    renderizarCarrinho()
+  })
+}
 
-// ======================
-// CATEGORIAS
-// ======================
+/* =======================
+   CATEGORIAS
+======================= */
 async function carregarCategorias() {
   const { data } = await supabase.from("categorias").select("*")
+  if (!data) return
+
   categoriasEl.innerHTML = ""
   criarBotaoCategoria("Todos")
   data.forEach(c => criarBotaoCategoria(c.nome))
@@ -71,21 +81,21 @@ function criarBotaoCategoria(nome) {
   categoriasEl.appendChild(btn)
 }
 
-// ======================
-// PRODUTOS
-// ======================
+/* =======================
+   PRODUTOS
+======================= */
 async function carregarProdutos() {
   const { data } = await supabase
     .from("produtos")
     .select("*")
     .eq("ativo", true)
 
-  produtos = data
+  if (data) produtos = data
 }
 
-// ======================
-// RENDER PRODUTOS
-// ======================
+/* =======================
+   RENDER PRODUTOS
+======================= */
 function renderizarProdutos() {
   listaProdutos.innerHTML = ""
 
@@ -102,8 +112,9 @@ function renderizarProdutos() {
   })
 }
 
-// PRODUTO NORMAL
 function renderizarProduto(p) {
+  if (p.preco == null) return
+
   listaProdutos.innerHTML += `
     <div class="card">
       <h3>${p.nome}</h3>
@@ -117,8 +128,9 @@ function renderizarProduto(p) {
   `
 }
 
-// PIZZA
 function renderizarPizza(p) {
+  if (p.preco_p == null || p.preco_m == null || p.preco_g == null) return
+
   listaProdutos.innerHTML += `
     <div class="card">
       <h3>${p.nome}</h3>
@@ -142,9 +154,9 @@ function renderizarPizza(p) {
   `
 }
 
-// ======================
-// CARRINHO
-// ======================
+/* =======================
+   CARRINHO
+======================= */
 window.addCarrinho = (nome, preco) => {
   carrinho.push({ nome, preco })
   renderizarCarrinho()
@@ -169,9 +181,9 @@ function renderizarCarrinho() {
   totalEl.innerText = `Total: R$ ${(subtotal + frete).toFixed(2)}`
 }
 
-// ======================
-// WHATSAPP COMPLETO 🔥
-// ======================
+/* =======================
+   WHATSAPP FINAL
+======================= */
 window.enviarPedido = () => {
   if (carrinho.length === 0) {
     alert("Carrinho vazio")
@@ -236,12 +248,12 @@ window.enviarPedido = () => {
     subtotal += item.preco
   })
 
-  mensagem += `%0A${frete > 0
+  mensagem += `%0A`
+  mensagem += frete > 0
     ? `🚗 *Frete:* R$ ${frete.toFixed(2)}`
     : `🚚 *Frete:* Grátis`
-  }%0A`
 
-  mensagem += `💰 *Total:* R$ ${(subtotal + frete).toFixed(2)}%0A`
+  mensagem += `%0A💰 *Total:* R$ ${(subtotal + frete).toFixed(2)}`
   mensagem += `%0A🔥 *DanBurgers agradece!*`
 
   window.open(`https://wa.me/5511963266825?text=${mensagem}`)

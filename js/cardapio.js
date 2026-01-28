@@ -100,20 +100,27 @@ function renderizarProdutoNormal(p) {
 // PIZZA COM TAMANHOS
 // ==========================
 function renderizarPizza(p) {
+  if (p.preco_p == null || p.preco_m == null || p.preco_g == null) {
+    return
+  }
+
   listaProdutos.innerHTML += `
     <div class="card">
       <h3>${p.nome}</h3>
       <p>${p.descricao || ""}</p>
 
-      <button class="btn btn-add" onclick='addCarrinho("${p.nome} (P)", ${p.preco_p})'>
+      <button class="btn btn-add"
+        onclick='addCarrinho("${p.nome} (P)", ${Number(p.preco_p)})'>
         🍕 Pequena — R$ ${Number(p.preco_p).toFixed(2)}
       </button>
 
-      <button class="btn btn-add" onclick='addCarrinho("${p.nome} (M)", ${p.preco_m})'>
+      <button class="btn btn-add"
+        onclick='addCarrinho("${p.nome} (M)", ${Number(p.preco_m)})'>
         🍕 Média — R$ ${Number(p.preco_m).toFixed(2)}
       </button>
 
-      <button class="btn btn-add" onclick='addCarrinho("${p.nome} (G)", ${p.preco_g})'>
+      <button class="btn btn-add"
+        onclick='addCarrinho("${p.nome} (G)", ${Number(p.preco_g)})'>
         🍕 Grande — R$ ${Number(p.preco_g).toFixed(2)}
       </button>
     </div>

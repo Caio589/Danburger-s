@@ -4,7 +4,14 @@ const categoriasEl = document.getElementById("categorias")
 const listaProdutos = document.getElementById("lista-produtos")
 const resumoEl = document.getElementById("resumo")
 const totalEl = document.getElementById("total")
+
 const entregaSelect = document.getElementById("entrega")
+const pagamentoSelect = document.getElementById("pagamento")
+const trocoInput = document.getElementById("troco")
+
+const nomeClienteInput = document.getElementById("nomeCliente")
+const telefoneClienteInput = document.getElementById("telefoneCliente")
+const enderecoClienteInput = document.getElementById("enderecoCliente")
 
 let produtos = []
 let carrinho = []
@@ -18,9 +25,32 @@ async function iniciar() {
   await carregarCategorias()
   await carregarProdutos()
   renderizarProdutos()
+  renderizarCarrinho()
+}
+iniciar()
+
+// ==========================
+// MOSTRAR TROCO SÓ SE DINHEIRO
+// ==========================
+if (pagamentoSelect) {
+  pagamentoSelect.addEventListener("change", () => {
+    if (pagamentoSelect.value === "dinheiro") {
+      trocoInput.style.display = "block"
+    } else {
+      trocoInput.style.display = "none"
+      trocoInput.value = ""
+    }
+  })
 }
 
-iniciar()
+// ==========================
+// ATUALIZAR TOTAL AO TROCAR ENTREGA
+// ==========================
+if (entregaSelect) {
+  entregaSelect.addEventListener("change", () => {
+    renderizarCarrinho()
+  })
+}
 
 // ==========================
 // CATEGORIAS
@@ -96,14 +126,14 @@ function renderizarProdutoNormal(p) {
       <div class="preco">R$ ${Number(p.preco).toFixed(2)}</div>
       <button class="btn btn-add"
         onclick='addCarrinho("${p.nome}", ${Number(p.preco)})'>
-        Adicionar
+        ➕ Adicionar
       </button>
     </div>
   `
 }
 
 // ==========================
-// PIZZA (P / M / G)
+// PIZZA P / M / G
 // ==========================
 function renderizarPizza(p) {
   if (p.preco_p == null || p.preco_m == null || p.preco_g == null) return
@@ -132,7 +162,7 @@ function renderizarPizza(p) {
 }
 
 // ==========================
-// CARRINHO
+// CARRINHO + FRETE
 // ==========================
 window.addCarrinho = (nome, preco) => {
   carrinho.push({ nome, preco })
@@ -144,36 +174,28 @@ function renderizarCarrinho() {
   let subtotal = 0
 
   carrinho.forEach(item => {
-    resumoEl.innerHTML += `<p>${item.nome} — R$ ${item.preco.toFixed(2)}</p>`
-    subtotal += item.preco
+    resumoEl.innerHTML += `🛒 ${item.nome} — R$ ${item.preco.toFixed(2)}<br>`
+    subtotal += Number(item.preco)
   })
 
-  // FRETE
   if (entregaSelect && entregaSelect.value === "fora") {
     frete = 7
   } else {
     frete = 0
   }
 
-  if (frete > 0) {
-    resumoEl.innerHTML += `<p>🚗 Frete — R$ ${frete.toFixed(2)}</p>`
-  }
+  resumoEl.innerHTML += `<br>`
+
+  resumoEl.innerHTML += frete > 0
+    ? `🚗 Frete: R$ ${frete.toFixed(2)}`
+    : `🚚 Frete: Grátis`
 
   const total = subtotal + frete
   totalEl.innerText = `Total: R$ ${total.toFixed(2)}`
 }
 
 // ==========================
-// ATUALIZA AO TROCAR ENTREGA
-// ==========================
-if (entregaSelect) {
-  entregaSelect.addEventListener("change", () => {
-    renderizarCarrinho()
-  })
-}
-
-// ==========================
-// WHATSAPP
+// WHATSAPP FINAL BONITO
 // ==========================
 window.enviarPedido = () => {
   if (carrinho.length === 0) {
@@ -181,21 +203,71 @@ window.enviarPedido = () => {
     return
   }
 
-  let mensagem = "🧾 *Pedido DanBurgers*%0A%0A"
-  let subtotal = 0
+  const nome = nomeClienteInput.value.trim()
+  const telefone = telefoneClienteInput.value.trim()
+  const endereco = enderecoClienteInput.value.trim()
+  const pagamento = pagamentoSelect.value
+  const troco = trocoInput.value
 
-  carrinho.forEach(i => {
-    mensagem += `• ${i.nome} - R$ ${i.preco.toFixed(2)}%0A`
-    subtotal += i.preco
-  })
-
-  if (frete > 0) {
-    mensagem += `🚗 Frete: R$ ${frete.toFixed(2)}%0A`
+  if (!nome || !telefone || !pagamento) {
+    alert("Preencha nome, telefone e pagamento")
+    return
   }
 
-  const total = subtotal + frete
-  mensagem += `%0A💰 Total: R$ ${total.toFixed(2)}`
+  if (entregaSelect.value !== "retirada" && !endereco) {
+    alert("Preencha o endereço")
+    return
+  }
 
-  const numero = "5511963266825" // seu WhatsApp
-  window.open(`https://wa.me/${numero}?text=${mensagem}`)
+  if (pagamento === "dinheiro" && !troco) {
+    alert("Informe o troco")
+    return
+  }
+
+  let subtotal = 0
+  let mensagem = "🍔🍕 *PEDIDO – DanBurgers* 🍕🍔%0A"
+  mensagem += "━━━━━━━━━━━━━━━━━━%0A%0A"
+
+  mensagem += `👤 *Cliente:* ${nome}%0A`
+  mensagem += `📞 *Telefone:* ${telefone}%0A`
+
+  mensagem += `📍 *Entrega:* `
+  mensagem += entregaSelect.value === "fora"
+    ? "Fora da cidade%0A"
+    : entregaSelect.value === "cidade"
+      ? "Na cidade%0A"
+      : "Retirada no local%0A"
+
+  if (entregaSelect.value !== "retirada") {
+    mensagem += `🏠 *Endereço:* ${endereco}%0A`
+  }
+
+  mensagem += `%0A💳 *Pagamento:* `
+  mensagem += pagamento === "pix"
+    ? "Pix%0A"
+    : pagamento === "cartao"
+      ? "Cartão%0A"
+      : "Dinheiro%0A"
+
+  if (pagamento === "dinheiro") {
+    mensagem += `💵 *Troco para:* R$ ${Number(troco).toFixed(2)}%0A`
+  }
+
+  mensagem += `%0A🛒 *Itens:*%0A`
+
+  carrinho.forEach((item, i) => {
+    mensagem += `${i + 1}️⃣ ${item.nome} — R$ ${item.preco.toFixed(2)}%0A`
+    subtotal += Number(item.preco)
+  })
+
+  mensagem += `%0A`
+  mensagem += frete > 0
+    ? `🚗 *Frete:* R$ ${frete.toFixed(2)}%0A`
+    : `🚚 *Frete:* Grátis%0A`
+
+  const total = subtotal + frete
+  mensagem += `💰 *Total:* R$ ${total.toFixed(2)}%0A`
+  mensagem += `%0A🔥 *DanBurgers agradece!*`
+
+  window.open(`https://wa.me/5511963266825?text=${mensagem}`)
 }

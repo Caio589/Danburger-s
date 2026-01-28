@@ -1,29 +1,33 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
 
-* { box-sizing: border-box; }
-
-html, body {
-  width: 100%;
-  height: 100%;
+* {
+  box-sizing: border-box;
 }
 
-body {
+html, body {
   margin: 0;
+  padding: 0;
+  min-height: 100%;
   font-family: 'Poppins', sans-serif;
+}
 
-  /* FUNDO CLÁSSICO DE HAMBÚRGUER (COM FALLBACK) */
-  background:
-    linear-gradient(rgba(0,0,0,.55), rgba(0,0,0,.85)),
-    url("https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=1600&q=80"),
-    url("https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=1600&q=80");
+/* FUNDO FIXO PROFISSIONAL (NÃO SOME) */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+
+  background-image:
+    linear-gradient(
+      rgba(0,0,0,0.55),
+      rgba(0,0,0,0.85)
+    ),
+    url("https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=1600&q=80");
 
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  background-attachment: fixed;
-
-  color: #fff;
-  min-height: 100vh;
 }
 
 /* CONTAINER */
@@ -31,6 +35,7 @@ body {
   max-width: 520px;
   margin: auto;
   padding: 20px;
+  color: #fff;
 }
 
 /* TÍTULOS */
@@ -43,20 +48,22 @@ h1 {
 
 .sub {
   text-align: center;
-  opacity: .9;
+  opacity: 0.9;
   margin-bottom: 25px;
 }
 
-/* CARDS (GLASSMORPHISM) */
+/* CARDS (GLASSMORPHISM REAL) */
 .card {
   background: rgba(255,255,255,0.12);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
   border-radius: 18px;
   padding: 16px;
   margin-bottom: 16px;
-  box-shadow: 0 15px 35px rgba(0,0,0,.6);
-  border: 1px solid rgba(255,255,255,.12);
+
+  box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+  border: 1px solid rgba(255,255,255,0.12);
 }
 
 /* TEXTO */
@@ -66,8 +73,8 @@ h1 {
 }
 
 .card p {
-  font-size: .9rem;
-  opacity: .9;
+  font-size: 0.9rem;
+  opacity: 0.9;
 }
 
 .preco {
@@ -86,7 +93,7 @@ h1 {
 }
 
 .btn-add {
-  background: rgba(255,255,255,.25);
+  background: rgba(255,255,255,0.25);
   color: #fff;
 }
 
@@ -103,12 +110,4 @@ input, select {
   border-radius: 12px;
   border: none;
   margin-bottom: 10px;
-  font-family: 'Poppins', sans-serif;
-}
-
-/* TOTAL */
-.total {
-  font-size: 1.15rem;
-  font-weight: 800;
-  text-align: right;
 }

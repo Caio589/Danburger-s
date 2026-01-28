@@ -3,12 +3,13 @@ import { supabase } from "./supabase.js"
 const lista = document.getElementById("lista-produtos")
 const resumo = document.getElementById("resumo")
 const totalEl = document.getElementById("total")
+const categoriasEl = document.getElementById("categorias")
 
 let produtos = []
 let carrinho = []
 let categoriaAtual = "Todos"
 
-// BUSCAR PRODUTOS
+// 🔹 BUSCAR PRODUTOS
 async function carregarProdutos() {
   const { data, error } = await supabase
     .from("produtos")
@@ -21,10 +22,29 @@ async function carregarProdutos() {
   }
 
   produtos = data
+  criarCategorias()
   renderizarProdutos()
 }
 
-// RENDERIZAR PRODUTOS
+// 🔹 CRIAR BOTÕES DE CATEGORIA
+function criarCategorias() {
+  categoriasEl.innerHTML = ""
+
+  const categorias = ["Todos", ...new Set(produtos.map(p => p.categoria))]
+
+  categorias.forEach(cat => {
+    const btn = document.createElement("button")
+    btn.className = "btn btn-add"
+    btn.innerText = cat
+    btn.onclick = () => {
+      categoriaAtual = cat
+      renderizarProdutos()
+    }
+    categoriasEl.appendChild(btn)
+  })
+}
+
+// 🔹 RENDERIZAR PRODUTOS FILTRADOS
 function renderizarProdutos() {
   lista.innerHTML = ""
 
@@ -46,19 +66,13 @@ function renderizarProdutos() {
   })
 }
 
-// FILTRAR CATEGORIA
-window.filtrar = (categoria) => {
-  categoriaAtual = categoria
-  renderizarProdutos()
-}
-
-// ADD CARRINHO
+// 🔹 CARRINHO
 window.add = (nome, preco) => {
   carrinho.push({ nome, preco })
   atualizarResumo()
 }
 
-// RESUMO + TOTAL
+// 🔹 RESUMO + TOTAL
 function atualizarResumo() {
   resumo.innerHTML = ""
   let total = 0
@@ -68,35 +82,7 @@ function atualizarResumo() {
     resumo.innerHTML += `<p>${i.nome} - R$ ${i.preco.toFixed(2)}</p>`
   })
 
-  const entrega = document.getElementById("entrega").value
-  if (entrega === "fora") total += 7
-
   totalEl.innerText = `Total: R$ ${total.toFixed(2)}`
-}
-
-document.getElementById("entrega").addEventListener("change", atualizarResumo)
-
-// ENVIAR WHATS
-window.enviarPedido = () => {
-  const nome = document.getElementById("nome").value
-  const tel = document.getElementById("telefone").value
-  const end = document.getElementById("endereco").value
-  const pag = document.getElementById("pagamento").value
-  const troco = document.getElementById("troco").value
-
-  let msg = `🍔 *Pedido DanBurgers*%0A`
-  msg += `👤 ${nome}%0A📞 ${tel}%0A`
-  msg += `%0A🧾 *Itens:*%0A`
-
-  carrinho.forEach(i => msg += `- ${i.nome}%0A`)
-
-  msg += `%0A🚚 Entrega: ${document.getElementById("entrega").value}%0A`
-  msg += `💳 Pagamento: ${pag}%0A`
-  if (troco) msg += `💵 Troco para: R$ ${troco}%0A`
-  msg += `💰 Total: ${totalEl.innerText.replace("Total: ", "")}`
-
-  const numero = "55SEUNUMEROAQUI"
-  window.open(`https://wa.me/${numero}?text=${msg}`, "_blank")
 }
 
 // START

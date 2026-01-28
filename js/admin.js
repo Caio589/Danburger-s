@@ -2,7 +2,7 @@ import { supabase } from "./supabase.js"
 
 document.addEventListener("DOMContentLoaded", () => {
 
-  console.log("ADMIN JS CARREGADO")
+  console.log("ADMIN JS OK")
 
   const listaCategorias = document.getElementById("lista-categorias")
   const listaProdutos = document.getElementById("lista-produtos")
@@ -11,20 +11,18 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnCriarCategoria = document.getElementById("btnCriarCategoria")
   const btnCriarProduto = document.getElementById("btnCriarProduto")
 
-  // ======================
+  // =========================
   // 🔹 CATEGORIAS
-  // ======================
+  // =========================
   async function carregarCategorias() {
     const { data, error } = await supabase
       .from("categorias")
       .select("*")
 
-    if (error) {
-      console.error("Erro ao carregar categorias:", error)
+    if (error || !Array.isArray(data)) {
+      console.error("Erro categorias:", error)
       return
     }
-
-    if (!Array.isArray(data)) return
 
     listaCategorias.innerHTML = ""
     selectCategoria.innerHTML = `<option value="">Selecione a categoria</option>`
@@ -34,50 +32,65 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="card">
           <b>${c.nome}</b>
           <div class="acoes">
-            <button class="btn editar" data-id="${c.id}" data-nome="${c.nome}">
+            <button class="btn editar"
+              data-id="${c.id}"
+              data-nome="${c.nome}">
               ✏️ Editar
             </button>
-            <button class="btn excluir" data-id="${c.id}">
+
+            <button class="btn excluir"
+              data-id="${c.id}">
               🗑️ Excluir
             </button>
           </div>
         </div>
       `
 
-      if (c.ativo) {
-        selectCategoria.innerHTML += `
-          <option value="${c.nome}">${c.nome}</option>
-        `
-      }
+      selectCategoria.innerHTML += `
+        <option value="${c.nome}">${c.nome}</option>
+      `
     })
 
-    // eventos editar/excluir categoria
-    document.querySelectorAll(".btn.editar").forEach(btn => {
+    // ✏️ EDITAR CATEGORIA
+    document.querySelectorAll("#lista-categorias .btn.editar").forEach(btn => {
       btn.onclick = async () => {
         const id = btn.dataset.id
         const nomeAtual = btn.dataset.nome
         const novoNome = prompt("Novo nome da categoria:", nomeAtual)
         if (!novoNome) return
 
-        await supabase
+        const { error } = await supabase
           .from("categorias")
           .update({ nome: novoNome })
           .eq("id", id)
+
+        if (error) {
+          alert("Erro ao editar categoria")
+          console.error(error)
+          return
+        }
 
         carregarCategorias()
         carregarProdutos()
       }
     })
 
-    document.querySelectorAll(".btn.excluir").forEach(btn => {
+    // 🗑️ EXCLUIR CATEGORIA (DELETE REAL)
+    document.querySelectorAll("#lista-categorias .btn.excluir").forEach(btn => {
       btn.onclick = async () => {
         const id = btn.dataset.id
-        if (!confirm("Excluir categoria?")) return
+        if (!confirm("Excluir categoria DEFINITIVAMENTE?")) return
 
-        await supabase
+        const { error } = await supabase
           .from("categorias")
-          .update({ ativo: false })
+          .delete()
           .eq("id", id)
+
+        if (error) {
+          alert("Erro ao excluir categoria")
+          console.error(error)
+          return
+        }
 
         carregarCategorias()
         carregarProdutos()
@@ -91,11 +104,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const { error } = await supabase
       .from("categorias")
-      .insert({ nome, ativo: true })
+      .insert({ nome })
 
     if (error) {
-      console.error(error)
       alert("Erro ao criar categoria")
+      console.error(error)
       return
     }
 
@@ -103,132 +116,92 @@ document.addEventListener("DOMContentLoaded", () => {
     carregarCategorias()
   }
 
- // ======================
-// 🔹 PRODUTOS
-// ======================
-async function carregarProdutos() {
-  const { data, error } = await supabase
-    .from("produtos")
-    .select("*")
+  // =========================
+  // 🔹 PRODUTOS
+  // =========================
+  async function carregarProdutos() {
+    const { data, error } = await supabase
+      .from("produtos")
+      .select("*")
 
-  if (error || !Array.isArray(data)) {
-    console.error("Erro ao carregar produtos:", error)
-    return
-  }
+    if (error || !Array.isArray(data)) {
+      console.error("Erro produtos:", error)
+      return
+    }
 
-  listaProdutos.innerHTML = ""
+    listaProdutos.innerHTML = ""
 
-  data.forEach(p => {
-    listaProdutos.innerHTML += `
-      <div class="card">
-        <b>${p.nome}</b> — ${p.categoria} — R$ ${p.preco}
-        <div class="acoes">
-          <button class="btn editar"
-            data-id="${p.id}"
-            data-nome="${p.nome}"
-            data-descricao="${p.descricao || ""}"
-            data-preco="${p.preco}"
-            data-categoria="${p.categoria}">
-            ✏️ Editar
-          </button>
+    data.forEach(p => {
+      listaProdutos.innerHTML += `
+        <div class="card">
+          <b>${p.nome}</b> — ${p.categoria} — R$ ${p.preco}
+          <div class="acoes">
+            <button class="btn editar"
+              data-id="${p.id}"
+              data-nome="${p.nome}"
+              data-descricao="${p.descricao || ""}"
+              data-preco="${p.preco}"
+              data-categoria="${p.categoria}">
+              ✏️ Editar
+            </button>
 
-          <button class="btn excluir" data-id="${p.id}">
-            🗑️ Excluir
-          </button>
+            <button class="btn excluir"
+              data-id="${p.id}">
+              🗑️ Excluir
+            </button>
+          </div>
         </div>
-      </div>
-    `
-  })
+      `
+    })
 
-  // ✏️ EDITAR
-  document.querySelectorAll(".btn.editar").forEach(btn => {
-    btn.onclick = async () => {
-      const id = btn.dataset.id
-      const nome = prompt("Nome:", btn.dataset.nome)
-      const descricao = prompt("Descrição:", btn.dataset.descricao)
-      const preco = prompt("Preço:", btn.dataset.preco)
-      const categoria = prompt("Categoria:", btn.dataset.categoria)
-
-      if (!nome || !preco || !categoria) return
-
-      const { error } = await supabase
-        .from("produtos")
-        .update({
-          nome,
-          descricao,
-          preco,
-          categoria
-        })
-        .eq("id", id)
-
-      if (error) {
-        console.error(error)
-        alert("Erro ao editar produto")
-        return
-      }
-
-      carregarProdutos()
-    }
-  })
-
-  // 🗑️ EXCLUIR (soft delete)
-  document.querySelectorAll(".btn.excluir").forEach(btn => {
-    btn.onclick = async () => {
-      const id = btn.dataset.id
-      if (!confirm("Excluir produto?")) return
-
-      const { error } = await supabase
-        .from("produtos")
-        .update({ ativo: false })
-        .eq("id", id)
-
-      if (error) {
-        console.error(error)
-        alert("Erro ao excluir produto")
-        return
-      }
-
-      carregarProdutos()
-    }
-  })
-}
-
-    // eventos editar/excluir produto
-    document.querySelectorAll(".btn.editar").forEach(btn => {
+    // ✏️ EDITAR PRODUTO
+    document.querySelectorAll("#lista-produtos .btn.editar").forEach(btn => {
       btn.onclick = async () => {
         const id = btn.dataset.id
 
-        const { data: p } = await supabase
-          .from("produtos")
-          .select("*")
-          .eq("id", id)
-          .single()
-
-        const nome = prompt("Nome:", p.nome)
-        const descricao = prompt("Descrição:", p.descricao || "")
-        const preco = prompt("Preço:", p.preco)
-        const categoria = prompt("Categoria:", p.categoria)
+        const nome = prompt("Nome:", btn.dataset.nome)
+        const descricao = prompt("Descrição:", btn.dataset.descricao)
+        const preco = prompt("Preço:", btn.dataset.preco)
+        const categoria = prompt("Categoria:", btn.dataset.categoria)
 
         if (!nome || !preco || !categoria) return
 
-        await supabase
+        const { error } = await supabase
           .from("produtos")
-          .update({ nome, descricao, preco, categoria })
+          .update({
+            nome,
+            descricao,
+            preco,
+            categoria
+          })
           .eq("id", id)
+
+        if (error) {
+          alert("Erro ao editar produto")
+          console.error(error)
+          return
+        }
 
         carregarProdutos()
       }
     })
 
-    document.querySelectorAll(".btn.excluir").forEach(btn => {
+    // 🗑️ EXCLUIR PRODUTO (DELETE REAL)
+    document.querySelectorAll("#lista-produtos .btn.excluir").forEach(btn => {
       btn.onclick = async () => {
         const id = btn.dataset.id
-        if (!confirm("Excluir produto?")) return
+        if (!confirm("Excluir produto DEFINITIVAMENTE?")) return
 
-        await supabase
+        const { error } = await supabase
           .from("produtos")
-          .update({ ativo: false })
+          .delete()
           .eq("id", id)
+
+        if (error) {
+          alert("Erro ao excluir produto")
+          console.error(error)
+          return
+        }
 
         carregarProdutos()
       }
@@ -252,13 +225,12 @@ async function carregarProdutos() {
         nome,
         descricao,
         preco,
-        categoria,
-        ativo: true
+        categoria
       })
 
     if (error) {
-      console.error(error)
       alert("Erro ao criar produto")
+      console.error(error)
       return
     }
 

@@ -6,89 +6,61 @@ document.addEventListener("DOMContentLoaded", () => {
   const listaProdutos = document.getElementById("lista-produtos")
   const selectCategoria = document.getElementById("categoriaProduto")
 
-  if (!selectCategoria) {
-    alert("ERRO: select de categoria não encontrado no HTML")
-    return
-  }
+  // ======================
+  // 🔹 CATEGORIAS
+  // ======================
 
-  // 🔹 CARREGAR CATEGORIAS
   async function carregarCategorias() {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("categorias")
       .select("*")
-      .eq("ativo", true)
-
-    if (error) {
-      console.error("Erro categorias:", error)
-      alert("Erro ao carregar categorias (veja o console)")
-      return
-    }
+      .order("created_at", { ascending: true })
 
     listaCategorias.innerHTML = ""
     selectCategoria.innerHTML = `<option value="">Selecione a categoria</option>`
 
     data.forEach(c => {
-      listaCategorias.innerHTML += `<p>📂 ${c.nome}</p>`
-      selectCategoria.innerHTML += `<option value="${c.nome}">${c.nome}</option>`
+      listaCategorias.innerHTML += `
+        <div class="card">
+          <b>${c.nome}</b>
+          <button onclick="editarCategoria('${c.id}', '${c.nome}')">✏️</button>
+          <button onclick="excluirCategoria('${c.id}')">🗑️</button>
+        </div>
+      `
+
+      if (c.ativo) {
+        selectCategoria.innerHTML += `<option value="${c.nome}">${c.nome}</option>`
+      }
     })
   }
 
-  // 🔹 CRIAR CATEGORIA (CORRIGIDO)
-  window.criarCategoria = async () => {
-    const nome = document.getElementById("novaCategoria").value.trim()
+  window.editarCategoria = async (id, nomeAtual) => {
+    const novoNome = prompt("Novo nome da categoria:", nomeAtual)
+    if (!novoNome) return
 
-    if (!nome) return alert("Digite o nome da categoria")
-
-    const { error } = await supabase
+    await supabase
       .from("categorias")
-      .insert({ nome, ativo: true })
+      .update({ nome: novoNome })
+      .eq("id", id)
 
-    if (error) {
-      alert("Erro ao criar categoria")
-      console.error(error)
-      return
-    }
-
-    document.getElementById("novaCategoria").value = ""
     carregarCategorias()
   }
 
-  // 🔹 CRIAR PRODUTO
-  window.criarProduto = async () => {
-    const nome = document.getElementById("nomeProduto").value.trim()
-    const descricao = document.getElementById("descricaoProduto").value.trim()
-    const preco = Number(document.getElementById("precoProduto").value)
-    const categoria = selectCategoria.value
+  window.excluirCategoria = async (id) => {
+    if (!confirm("Excluir categoria?")) return
 
-    if (!nome || !preco || !categoria) {
-      alert("Preencha nome, preço e categoria")
-      return
-    }
+    await supabase
+      .from("categorias")
+      .update({ ativo: false })
+      .eq("id", id)
 
-    const { error } = await supabase
-      .from("produtos")
-      .insert({
-        nome,
-        descricao,
-        preco,
-        categoria,
-        ativo: true
-      })
-
-    if (error) {
-      alert("Erro ao criar produto")
-      console.error(error)
-      return
-    }
-
-    document.getElementById("nomeProduto").value = ""
-    document.getElementById("descricaoProduto").value = ""
-    document.getElementById("precoProduto").value = ""
-
-    carregarProdutos()
+    carregarCategorias()
   }
 
-  // 🔹 LISTAR PRODUTOS
+  // ======================
+  // 🔹 PRODUTOS
+  // ======================
+
   async function carregarProdutos() {
     const { data } = await supabase
       .from("produtos")
@@ -96,12 +68,60 @@ document.addEventListener("DOMContentLoaded", () => {
       .order("created_at", { ascending: false })
 
     listaProdutos.innerHTML = ""
+
     data.forEach(p => {
-      listaProdutos.innerHTML += `<p>🍔 ${p.nome} — ${p.categoria}</p>`
+      listaProdutos.innerHTML += `
+        <div class="card">
+          <b>${p.nome}</b> — ${p.categoria} — R$ ${p.preco}
+          <br>
+          <button onclick="editarProduto('${p.id}')">✏️ Editar</button>
+          <button onclick="excluirProduto('${p.id}')">🗑️ Excluir</button>
+        </div>
+      `
     })
   }
 
+  window.editarProduto = async (id) => {
+    const { data } = await supabase
+      .from("produtos")
+      .select("*")
+      .eq("id", id)
+      .single()
+
+    const nome = prompt("Nome:", data.nome)
+    const descricao = prompt("Descrição:", data.descricao || "")
+    const preco = prompt("Preço:", data.preco)
+    const categoria = prompt("Categoria:", data.categoria)
+
+    if (!nome || !preco || !categoria) return
+
+    await supabase
+      .from("produtos")
+      .update({
+        nome,
+        descricao,
+        preco,
+        categoria
+      })
+      .eq("id", id)
+
+    carregarProdutos()
+  }
+
+  window.excluirProduto = async (id) => {
+    if (!confirm("Excluir produto?")) return
+
+    await supabase
+      .from("produtos")
+      .update({ ativo: false })
+      .eq("id", id)
+
+    carregarProdutos()
+  }
+
+  // ======================
   // 🚀 START
+  // ======================
   carregarCategorias()
   carregarProdutos()
 })

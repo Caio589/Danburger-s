@@ -1,85 +1,99 @@
 import { supabase } from "./supabase.js"
 
 const categoriasEl = document.getElementById("categorias")
-const lista = document.getElementById("lista-produtos")
-const resumo = document.getElementById("resumo")
-const totalEl = document.getElementById("total")
+const listaProdutos = document.getElementById("lista-produtos")
 
 let produtos = []
-let carrinho = []
 let categoriaAtual = "Todos"
 
-async function carregarTudo() {
-  const { data: cats } = await supabase
+// ==========================
+// 🚀 START
+// ==========================
+async function iniciar() {
+  await carregarCategorias()
+  await carregarProdutos()
+  renderizarProdutos()
+}
+
+// ==========================
+// 📂 CATEGORIAS (DO BANCO)
+// ==========================
+async function carregarCategorias() {
+  const { data, error } = await supabase
     .from("categorias")
     .select("*")
-    .eq("ativo", true)
 
-  categoriasEl.innerHTML = `<button class="btn btn-add" onclick="filtrar('Todos')">Todos</button>`
-  cats.forEach(c => {
-    categoriasEl.innerHTML += `
-      <button class="btn btn-add" onclick="filtrar('${c.nome}')">${c.nome}</button>
-    `
+  if (error || !Array.isArray(data)) {
+    console.error("Erro categorias:", error)
+    return
+  }
+
+  categoriasEl.innerHTML = ""
+
+  // Botão TODOS
+  criarBotaoCategoria("Todos")
+
+  data.forEach(c => {
+    criarBotaoCategoria(c.nome)
   })
+}
 
-  const { data: prods } = await supabase
+function criarBotaoCategoria(nome) {
+  const btn = document.createElement("button")
+  btn.className = "btn btn-add"
+  btn.innerText = nome
+
+  btn.onclick = () => {
+    categoriaAtual = nome
+    renderizarProdutos()
+  }
+
+  categoriasEl.appendChild(btn)
+}
+
+// ==========================
+// 🍔 PRODUTOS
+// ==========================
+async function carregarProdutos() {
+  const { data, error } = await supabase
     .from("produtos")
     .select("*")
-    .eq("ativo", true)
 
-  produtos = prods
-  renderizar()
+  if (error || !Array.isArray(data)) {
+    console.error("Erro produtos:", error)
+    return
+  }
+
+  produtos = data
 }
 
-window.filtrar = (cat) => {
-  categoriaAtual = cat
-  renderizar()
-}
+// ==========================
+// 🧾 RENDERIZAR PRODUTOS
+// ==========================
+function renderizarProdutos() {
+  listaProdutos.innerHTML = ""
 
-function renderizar() {
-  lista.innerHTML = ""
   const filtrados = categoriaAtual === "Todos"
     ? produtos
     : produtos.filter(p => p.categoria === categoriaAtual)
 
+  if (filtrados.length === 0) {
+    listaProdutos.innerHTML = `<p>Nenhum produto nesta categoria.</p>`
+    return
+  }
+
   filtrados.forEach(p => {
-    lista.innerHTML += `
+    listaProdutos.innerHTML += `
       <div class="card">
         <h3>${p.nome}</h3>
         <p>${p.descricao || ""}</p>
-        <div class="preco">R$ ${p.preco.toFixed(2)}</div>
-        <button class="btn btn-add" onclick="add('${p.nome}', ${p.preco})">Adicionar</button>
+        <div class="preco">R$ ${Number(p.preco).toFixed(2)}</div>
       </div>
     `
   })
 }
 
-window.add = (nome, preco) => {
-  carrinho.push({ nome, preco })
-  atualizarResumo()
-}
-
-function atualizarResumo() {
-  resumo.innerHTML = ""
-  let total = 0
-
-  carrinho.forEach(i => {
-    total += i.preco
-    resumo.innerHTML += `<p>${i.nome} - R$ ${i.preco.toFixed(2)}</p>`
-  })
-
-  const entrega = document.getElementById("entrega").value
-  if (entrega === "fora") total += 7
-
-  totalEl.innerText = `Total: R$ ${total.toFixed(2)}`
-}
-
-window.enviarPedido = () => {
-  let msg = `🍔 Pedido DanBurgers%0A`
-  carrinho.forEach(i => msg += `- ${i.nome}%0A`)
-  msg += `%0ATotal: ${totalEl.innerText}`
-
-  window.open(`https://wa.me/55SEUNUMEROAQUI?text=${msg}`)
-}
-
-carregarTudo()
+// ==========================
+// START
+// ==========================
+iniciar()

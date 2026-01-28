@@ -2,12 +2,15 @@ import { supabase } from "./supabase.js"
 
 const categoriasEl = document.getElementById("categorias")
 const listaProdutos = document.getElementById("lista-produtos")
+const resumoEl = document.getElementById("resumo")
+const totalEl = document.getElementById("total")
 
 let produtos = []
+let carrinho = []
 let categoriaAtual = "Todos"
 
 // ==========================
-// 🚀 START
+// START
 // ==========================
 async function iniciar() {
   await carregarCategorias()
@@ -15,27 +18,22 @@ async function iniciar() {
   renderizarProdutos()
 }
 
+iniciar()
+
 // ==========================
-// 📂 CATEGORIAS (DO BANCO)
+// CATEGORIAS
 // ==========================
 async function carregarCategorias() {
   const { data, error } = await supabase
     .from("categorias")
     .select("*")
 
-  if (error || !Array.isArray(data)) {
-    console.error("Erro categorias:", error)
-    return
-  }
+  if (error || !Array.isArray(data)) return
 
   categoriasEl.innerHTML = ""
-
-  // Botão TODOS
   criarBotaoCategoria("Todos")
 
-  data.forEach(c => {
-    criarBotaoCategoria(c.nome)
-  })
+  data.forEach(c => criarBotaoCategoria(c.nome))
 }
 
 function criarBotaoCategoria(nome) {
@@ -52,23 +50,19 @@ function criarBotaoCategoria(nome) {
 }
 
 // ==========================
-// 🍔 PRODUTOS
+// PRODUTOS
 // ==========================
 async function carregarProdutos() {
   const { data, error } = await supabase
     .from("produtos")
     .select("*")
 
-  if (error || !Array.isArray(data)) {
-    console.error("Erro produtos:", error)
-    return
-  }
-
+  if (error || !Array.isArray(data)) return
   produtos = data
 }
 
 // ==========================
-// 🧾 RENDERIZAR PRODUTOS
+// RENDERIZA PRODUTOS
 // ==========================
 function renderizarProdutos() {
   listaProdutos.innerHTML = ""
@@ -77,23 +71,91 @@ function renderizarProdutos() {
     ? produtos
     : produtos.filter(p => p.categoria === categoriaAtual)
 
-  if (filtrados.length === 0) {
-    listaProdutos.innerHTML = `<p>Nenhum produto nesta categoria.</p>`
-    return
-  }
-
   filtrados.forEach(p => {
-    listaProdutos.innerHTML += `
-      <div class="card">
-        <h3>${p.nome}</h3>
-        <p>${p.descricao || ""}</p>
-        <div class="preco">R$ ${Number(p.preco).toFixed(2)}</div>
-      </div>
-    `
+    if (p.categoria.toLowerCase() === "pizza") {
+      renderizarPizza(p)
+    } else {
+      renderizarProdutoNormal(p)
+    }
   })
 }
 
 // ==========================
-// START
+// PRODUTO NORMAL
 // ==========================
-iniciar()
+function renderizarProdutoNormal(p) {
+  listaProdutos.innerHTML += `
+    <div class="card">
+      <h3>${p.nome}</h3>
+      <p>${p.descricao || ""}</p>
+      <div class="preco">R$ ${Number(p.preco).toFixed(2)}</div>
+      <button class="btn btn-add" onclick='addCarrinho("${p.nome}", ${p.preco})'>
+        Adicionar
+      </button>
+    </div>
+  `
+}
+
+// ==========================
+// PIZZA COM TAMANHOS
+// ==========================
+function renderizarPizza(p) {
+  listaProdutos.innerHTML += `
+    <div class="card">
+      <h3>${p.nome}</h3>
+      <p>${p.descricao || ""}</p>
+
+      <button class="btn btn-add" onclick='addCarrinho("${p.nome} (P)", ${p.preco_p})'>
+        🍕 Pequena — R$ ${Number(p.preco_p).toFixed(2)}
+      </button>
+
+      <button class="btn btn-add" onclick='addCarrinho("${p.nome} (M)", ${p.preco_m})'>
+        🍕 Média — R$ ${Number(p.preco_m).toFixed(2)}
+      </button>
+
+      <button class="btn btn-add" onclick='addCarrinho("${p.nome} (G)", ${p.preco_g})'>
+        🍕 Grande — R$ ${Number(p.preco_g).toFixed(2)}
+      </button>
+    </div>
+  `
+}
+
+// ==========================
+// CARRINHO
+// ==========================
+window.addCarrinho = (nome, preco) => {
+  carrinho.push({ nome, preco })
+  renderizarCarrinho()
+}
+
+function renderizarCarrinho() {
+  resumoEl.innerHTML = ""
+  let total = 0
+
+  carrinho.forEach(item => {
+    resumoEl.innerHTML += `<p>${item.nome} — R$ ${item.preco.toFixed(2)}</p>`
+    total += item.preco
+  })
+
+  totalEl.innerText = `Total: R$ ${total.toFixed(2)}`
+}
+
+// ==========================
+// ENVIAR WHATSAPP
+// ==========================
+window.enviarPedido = () => {
+  if (carrinho.length === 0) {
+    alert("Carrinho vazio")
+    return
+  }
+
+  let mensagem = "🧾 *Pedido DanBurgers*%0A%0A"
+  carrinho.forEach(i => {
+    mensagem += `• ${i.nome} - R$ ${i.preco.toFixed(2)}%0A`
+  })
+
+  mensagem += `%0A${totalEl.innerText}`
+
+  const numero = "5511963266825" // SEU WHATS
+  window.open(`https://wa.me/${numero}?text=${mensagem}`)
+}

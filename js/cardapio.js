@@ -1,53 +1,43 @@
 import { supabase } from "./supabase.js"
 
+const categoriasEl = document.getElementById("categorias")
 const lista = document.getElementById("lista-produtos")
 const resumo = document.getElementById("resumo")
 const totalEl = document.getElementById("total")
-const categoriasEl = document.getElementById("categorias")
 
 let produtos = []
 let carrinho = []
 let categoriaAtual = "Todos"
 
-// 🔹 BUSCAR PRODUTOS
-async function carregarProdutos() {
-  const { data, error } = await supabase
+async function carregarTudo() {
+  const { data: cats } = await supabase
+    .from("categorias")
+    .select("*")
+    .eq("ativo", true)
+
+  categoriasEl.innerHTML = `<button class="btn btn-add" onclick="filtrar('Todos')">Todos</button>`
+  cats.forEach(c => {
+    categoriasEl.innerHTML += `
+      <button class="btn btn-add" onclick="filtrar('${c.nome}')">${c.nome}</button>
+    `
+  })
+
+  const { data: prods } = await supabase
     .from("produtos")
     .select("*")
     .eq("ativo", true)
 
-  if (error) {
-    console.error(error)
-    return
-  }
-
-  produtos = data
-  criarCategorias()
-  renderizarProdutos()
+  produtos = prods
+  renderizar()
 }
 
-// 🔹 CRIAR BOTÕES DE CATEGORIA
-function criarCategorias() {
-  categoriasEl.innerHTML = ""
-
-  const categorias = ["Todos", ...new Set(produtos.map(p => p.categoria))]
-
-  categorias.forEach(cat => {
-    const btn = document.createElement("button")
-    btn.className = "btn btn-add"
-    btn.innerText = cat
-    btn.onclick = () => {
-      categoriaAtual = cat
-      renderizarProdutos()
-    }
-    categoriasEl.appendChild(btn)
-  })
+window.filtrar = (cat) => {
+  categoriaAtual = cat
+  renderizar()
 }
 
-// 🔹 RENDERIZAR PRODUTOS FILTRADOS
-function renderizarProdutos() {
+function renderizar() {
   lista.innerHTML = ""
-
   const filtrados = categoriaAtual === "Todos"
     ? produtos
     : produtos.filter(p => p.categoria === categoriaAtual)
@@ -57,22 +47,18 @@ function renderizarProdutos() {
       <div class="card">
         <h3>${p.nome}</h3>
         <p>${p.descricao || ""}</p>
-        <div class="preco">R$ ${Number(p.preco).toFixed(2)}</div>
-        <button class="btn btn-add" onclick="add('${p.nome}', ${p.preco})">
-          ➕ Adicionar
-        </button>
+        <div class="preco">R$ ${p.preco.toFixed(2)}</div>
+        <button class="btn btn-add" onclick="add('${p.nome}', ${p.preco})">Adicionar</button>
       </div>
     `
   })
 }
 
-// 🔹 CARRINHO
 window.add = (nome, preco) => {
   carrinho.push({ nome, preco })
   atualizarResumo()
 }
 
-// 🔹 RESUMO + TOTAL
 function atualizarResumo() {
   resumo.innerHTML = ""
   let total = 0
@@ -82,8 +68,18 @@ function atualizarResumo() {
     resumo.innerHTML += `<p>${i.nome} - R$ ${i.preco.toFixed(2)}</p>`
   })
 
+  const entrega = document.getElementById("entrega").value
+  if (entrega === "fora") total += 7
+
   totalEl.innerText = `Total: R$ ${total.toFixed(2)}`
 }
 
-// START
-carregarProdutos()
+window.enviarPedido = () => {
+  let msg = `🍔 Pedido DanBurgers%0A`
+  carrinho.forEach(i => msg += `- ${i.nome}%0A`)
+  msg += `%0ATotal: ${totalEl.innerText}`
+
+  window.open(`https://wa.me/55SEUNUMEROAQUI?text=${msg}`)
+}
+
+carregarTudo()

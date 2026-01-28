@@ -12,7 +12,7 @@
     <h1>🍔 DanBurgers</h1>
     <div class="sub">Hambúrguer artesanal</div>
 
-    <!-- CATEGORIAS (DINÂMICAS) -->
+    <!-- CATEGORIAS -->
     <div class="card">
       <div id="categorias"></div>
     </div>
@@ -25,6 +25,33 @@
       <h3>🛒 Seu pedido</h3>
       <div id="resumo"></div>
       <div class="total" id="total">Total: R$ 0,00</div>
+    </div>
+
+    <!-- DADOS DO CLIENTE -->
+    <div class="card">
+      <h3>👤 Dados do cliente</h3>
+
+      <input id="nome" placeholder="Seu nome">
+      <input id="telefone" placeholder="WhatsApp">
+      <input id="endereco" placeholder="Endereço (se entrega)">
+
+      <select id="entrega">
+        <option value="retirada">Retirada no local (Grátis)</option>
+        <option value="cidade">Entrega na cidade (Grátis)</option>
+        <option value="fora">Entrega fora da cidade (+R$7)</option>
+      </select>
+
+      <select id="pagamento">
+        <option value="Pix">Pix</option>
+        <option value="Dinheiro">Dinheiro</option>
+        <option value="Cartão">Cartão</option>
+      </select>
+
+      <input id="troco" type="number" placeholder="Troco para quanto? (opcional)">
+
+      <button class="btn btn-whats" onclick="enviarPedido()">
+        📲 Enviar pedido pelo WhatsApp
+      </button>
     </div>
   </div>
 

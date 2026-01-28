@@ -1,24 +1,38 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>⚙️ ADM DanBurgers</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <meta charset="UTF-8">
+  <title>ADM - DanBurgers</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
+  <div class="container">
+    <h1>⚙️ ADM DanBurgers</h1>
 
-  <h1>⚙️ Painel Administrativo</h1>
+    <!-- CATEGORIAS -->
+    <div class="card">
+      <h3>📂 Categorias</h3>
+      <input id="novaCategoria" placeholder="Nome da categoria">
+      <button class="btn" onclick="criarCategoria()">Adicionar categoria</button>
+      <div id="lista-categorias"></div>
+    </div>
 
-  <form id="form-produto">
-    <input type="text" name="nome" placeholder="Nome do produto" required />
-    <input type="text" name="descricao" placeholder="Descrição" />
-    <input type="number" name="preco" step="0.01" placeholder="Preço" required />
-    <input type="text" name="categoria" placeholder="Categoria" />
-    <button type="submit">Cadastrar Produto</button>
-  </form>
+    <!-- PRODUTOS -->
+    <div class="card">
+      <h3>🍔 Produtos</h3>
 
-  <!-- ADMIN -->
+      <input id="nome" placeholder="Nome do produto">
+      <input id="descricao" placeholder="Descrição">
+      <input id="preco" type="number" placeholder="Preço">
+      <select id="categoriaProduto"></select>
+
+      <button class="btn" onclick="criarProduto()">Adicionar produto</button>
+      <div id="lista-produtos"></div>
+    </div>
+  </div>
+
   <script type="module" src="js/admin.js"></script>
 </body>
 </html>

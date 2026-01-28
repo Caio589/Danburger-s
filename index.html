@@ -5,23 +5,36 @@
   <title>🍔 DanBurgers</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- CSS (OBRIGATÓRIO) -->
+  <!-- CSS -->
   <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
   <div class="container">
     <h1>🍔 DanBurgers</h1>
-    <div class="sub">lanchonete</div>
+    <div class="sub">Hambúrguer artesanal</div>
 
+    <!-- CATEGORIAS -->
+    <div class="card">
+      <div id="categorias">
+        <button class="btn btn-add" onclick="filtrar('Todos')">Todos</button>
+        <button class="btn btn-add" onclick="filtrar('Burgers')">🍔 Burgers</button>
+        <button class="btn btn-add" onclick="filtrar('Bebidas')">🥤 Bebidas</button>
+        <button class="btn btn-add" onclick="filtrar('Acompanhamentos')">🍟 Acompanhamentos</button>
+      </div>
+    </div>
+
+    <!-- PRODUTOS -->
     <div id="lista-produtos"></div>
 
+    <!-- RESUMO -->
     <div class="card">
       <h3>🛒 Seu pedido</h3>
       <div id="resumo"></div>
       <div class="total" id="total">Total: R$ 0,00</div>
     </div>
 
+    <!-- DADOS -->
     <div class="card">
       <h3>👤 Dados do cliente</h3>
 

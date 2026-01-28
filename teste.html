@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>DanBurgers – Teste</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    /* FUNDO GARANTIDO */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+
+      background-image:
+        linear-gradient(
+          rgba(0,0,0,0.55),
+          rgba(0,0,0,0.85)
+        ),
+        url("https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=1600&q=80");
+
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    .container {
+      max-width: 520px;
+      margin: auto;
+      padding: 20px;
+      color: #fff;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2.4rem;
+      font-weight: 800;
+      margin-bottom: 5px;
+    }
+
+    .sub {
+      text-align: center;
+      opacity: 0.9;
+      margin-bottom: 25px;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.12);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+
+      border-radius: 18px;
+      padding: 16px;
+      margin-bottom: 16px;
+
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .card h3 {
+      margin: 0;
+      font-size: 1.15rem;
+    }
+
+    .card p {
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+
+    .preco {
+      font-weight: 800;
+      margin: 8px 0;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      border-radius: 14px;
+      border: none;
+      font-weight: 700;
+      cursor: pointer;
+      background: rgba(255,255,255,0.25);
+      color: #fff;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>🍔 DanBurgers</h1>
+    <div class="sub">Hambúrguer artesanal</div>
+
+    <div class="card">
+      <h3>X-Burger</h3>
+      <p>Pão, carne, queijo</p>
+      <div class="preco">R$ 18,00</div>
+      <button>Adicionar</button>
+    </div>
+
+    <div class="card">
+      <h3>X-Bacon</h3>
+      <p>Pão, carne, queijo e bacon</p>
+      <div class="preco">R$ 22,00</div>
+      <button>Adicionar</button>
+    </div>
+  </div>
+</body>
+</html>

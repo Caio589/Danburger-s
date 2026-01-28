@@ -161,3 +161,30 @@ button {
 .btn-whats:hover {
   opacity: 0.85;
 }
+/* ============================= */
+/* CATEGORIAS SEM BARRA DE SCROLL */
+/* ============================= */
+
+.categorias-topo {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* container das categorias */
+#categorias {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+
+  /* remove scroll */
+  overflow: hidden;
+}
+
+/* botões */
+#categorias .btn {
+  text-align: center;
+  white-space: nowrap;
+  background: rgba(255,255,255,0.25);
+}
+

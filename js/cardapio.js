@@ -189,10 +189,11 @@ window.enviarPedido = function () {
     .then(() => {
       alert("Pedido enviado com sucesso")
       carrinho = []
-      renderizarCarrinho()
+         renderizarCarrinho()
     })
     .catch(err => {
       console.error(err)
       alert("Erro ao enviar pedido")
     })
+}
 }

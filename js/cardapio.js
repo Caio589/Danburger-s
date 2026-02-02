@@ -230,6 +230,8 @@ window.enviarPedido = () => {
 
   mensagem += `%0A💰 *Total:* R$ ${totalPedido.toFixed(2)}`
 
+}
+
   // 👉 ENVIO PARA BACKEND
   enviarPedidoBackend(totalPedido)
 

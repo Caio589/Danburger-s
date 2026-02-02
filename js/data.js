@@ -4,16 +4,14 @@ export async function buscarProdutos() {
   const { data, error } = await supabase
     .from("produtos")
     .select("*")
-    .eq("ativo", true)
     .order("created_at", { ascending: false })
 
   if (error) {
-    alert("Erro ao buscar produtos")
     console.error(error)
     return []
   }
 
-  return data
+  return data || []
 }
 
 export async function criarProduto(produto) {
@@ -22,7 +20,7 @@ export async function criarProduto(produto) {
     .insert([produto])
 
   if (error) {
-    alert("Erro ao cadastrar produto")
     console.error(error)
+    throw error
   }
 }

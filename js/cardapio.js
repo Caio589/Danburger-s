@@ -272,3 +272,25 @@ fetch("http://127.0.0.1:5000/novo_pedido", {
     carrinho = [];
     renderizarCarrinho();
 });
+function enviarPedidoBackend() {
+    fetch("http://127.0.0.1:5000/novo_pedido", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            itens: carrinho,
+            total: total
+        })
+    })
+    .then(res => res.json())
+    .then(() => {
+        alert("Pedido enviado com sucesso!");
+        carrinho = [];
+        renderizarCarrinho();
+    })
+    .catch(err => {
+        console.error("Erro ao enviar pedido:", err);
+        alert("Erro ao enviar pedido");
+    });
+}

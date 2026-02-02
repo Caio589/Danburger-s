@@ -184,14 +184,17 @@ function renderizarCarrinho() {
 /* =======================
    ENVIO DO PEDIDO
 ======================= */
-window.enviarPedido = () => {
+window.enviarPedido = function () {
   if (carrinho.length === 0) {
     alert("Carrinho vazio")
     return
   }
 
   let subtotal = 0
-  carrinho.forEach(i => subtotal += i.preco)
+  carrinho.forEach(item => {
+    subtotal += item.preco
+  })
+
   const totalPedido = subtotal + frete
 
   enviarPedidoBackend(totalPedido)
@@ -222,3 +225,7 @@ function enviarPedidoBackend(totalPedido) {
       alert("Erro ao enviar pedido")
     })
 }
+
+/* =======================
+   FIM DO ARQUIVO
+======================= */

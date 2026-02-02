@@ -184,6 +184,9 @@ function renderizarCarrinho() {
 /* =======================
    WHATSAPP FINAL
 ======================= */
+/* =======================
+   WHATSAPP FINAL
+======================= */
 window.enviarPedido = () => {
   if (carrinho.length === 0) {
     alert("Carrinho vazio")
@@ -215,32 +218,7 @@ window.enviarPedido = () => {
     "🍔🍕 *PEDIDO – DanBurgers* 🍕🍔%0A" +
     "━━━━━━━━━━━━━━━━━━%0A%0A" +
     `👤 *Cliente:* ${nome}%0A` +
-    `📞 *Telefone:* ${telefone}%0A` +
-    `📍 *Entrega:* ${
-      entregaSelect.value === "fora"
-        ? "Fora da cidade"
-        : entregaSelect.value === "cidade"
-          ? "Na cidade"
-          : "Retirada no local"
-    }%0A`
-
-  if (entregaSelect.value !== "retirada") {
-    mensagem += `🏠 *Endereço:* ${endereco}%0A`
-  }
-
-  mensagem += `%0A💳 *Pagamento:* ${
-    pagamento === "pix"
-      ? "Pix"
-      : pagamento === "cartao"
-        ? "Cartão"
-        : "Dinheiro"
-  }%0A`
-
-  if (pagamento === "dinheiro") {
-    mensagem += `💵 *Troco para:* R$ ${Number(troco).toFixed(2)}%0A`
-  }
-
-  mensagem += `%0A🛒 *Itens do pedido:*%0A`
+    `📞 *Telefone:* ${telefone}%0A`
 
   let subtotal = 0
   carrinho.forEach((item, i) => {
@@ -248,36 +226,43 @@ window.enviarPedido = () => {
     subtotal += item.preco
   })
 
-  mensagem += `%0A`
-  mensagem += frete > 0
-    ? `🚗 *Frete:* R$ ${frete.toFixed(2)}`
-    : `🚚 *Frete:* Grátis`
+  const totalPedido = subtotal + frete
 
-  mensagem += `%0A💰 *Total:* R$ ${(subtotal + frete).toFixed(2)}`
-  mensagem += `%0A🔥 *DanBurgers agradece!*`
+  mensagem += `%0A💰 *Total:* R$ ${totalPedido.toFixed(2)}`
 
-function enviarPedidoBackend() {
-    fetch("http://127.0.0.1:5000/novo_pedido", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            itens: carrinho,
-            total: total
-        })
-    })
-    .then(res => res.json())
-    .then(() => {
-        alert("Pedido enviado com sucesso!");
-        carrinho = [];
-        renderizarCarrinho();
-    })
-    .catch(err => {
-        console.error(err);
-        alert("Erro ao enviar pedido");
-    });
+  // 👉 ENVIO PARA BACKEND
+  enviarPedidoBackend(totalPedido)
+
+  // 👉 (opcional) continua abrindo WhatsApp se quiser
+  // window.open(`https://wa.me/SEUNUMERO?text=${mensagem}`)
 }
 
-enviarPedidoBackend();
+/* =======================
+   BACKEND
+======================= */
+function enviarPedidoBackend(totalPedido) {
+  fetch("http://127.0.0.1:5000/novo_pedido", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      cliente: nomeInput.value,
+      telefone: telefoneInput.value,
+      itens: carrinho,
+      total: totalPedido,
+      pagamento: pagamentoSelect.value,
+      entrega: entregaSelect.value
+    })
+  })
+    .then(res => res.json())
+    .then(() => {
+      alert("Pedido enviado com sucesso!")
+      carrinho = []
+      renderizarCarrinho()
+    })
+    .catch(err => {
+      console.error(err)
+      alert("Erro ao enviar pedido")
+    })
 }

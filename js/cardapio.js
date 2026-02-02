@@ -256,5 +256,20 @@ window.enviarPedido = () => {
   mensagem += `%0A💰 *Total:* R$ ${(subtotal + frete).toFixed(2)}`
   mensagem += `%0A🔥 *DanBurgers agradece!*`
 
-  window.open(`https://wa.me/5511963266825?text=${mensagem}`)
-}
+fetch("https://SEU_BACKEND_LANCHONETE.onrender.com/novo_pedido", {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+        itens: JSON.stringify(carrinho),
+        total: total,
+        observacao: observacao.value || ""
+    })
+})
+.then(res => res.json())
+.then(data => {
+    alert("Pedido enviado com sucesso!");
+    carrinho = [];
+    renderizarCarrinho();
+});

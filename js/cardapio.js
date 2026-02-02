@@ -256,7 +256,7 @@ window.enviarPedido = () => {
   mensagem += `%0A💰 *Total:* R$ ${(subtotal + frete).toFixed(2)}`
   mensagem += `%0A🔥 *DanBurgers agradece!*`
 
-fetch("https://SEU_BACKEND_LANCHONETE.onrender.com/novo_pedido", {
+fetch("https://www.danburgers.com.br/novo_pedido", {
     method: "POST",
     headers: {
         "Content-Type": "application/json"

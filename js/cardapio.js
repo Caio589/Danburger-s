@@ -33,10 +33,7 @@ iniciar()
    CATEGORIAS
 ======================= */
 async function carregarCategorias() {
-  const { data, error } = await supabase
-    .from("categorias")
-    .select("*")
-
+  const { data, error } = await supabase.from("categorias").select("*")
   if (error) {
     console.error(error)
     return
@@ -62,15 +59,11 @@ function criarBotaoCategoria(nome) {
    PRODUTOS
 ======================= */
 async function carregarProdutos() {
-  const { data, error } = await supabase
-    .from("produtos")
-    .select("*")
-
+  const { data, error } = await supabase.from("produtos").select("*")
   if (error) {
     console.error(error)
     return
   }
-
   produtos = data || []
 }
 
@@ -173,8 +166,7 @@ window.enviarPedido = function () {
   }
 
   let subtotal = 0
-  carrinho.forEach(item => subtotal += item.preco)
-
+  carrinho.forEach(item => (subtotal += item.preco))
   const totalPedido = subtotal + frete
 
   fetch("http://127.0.0.1:5000/novo_pedido", {

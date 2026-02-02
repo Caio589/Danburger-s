@@ -294,3 +294,4 @@ function enviarPedidoBackend() {
         alert("Erro ao enviar pedido");
     });
 }
+enviarPedidoBackend();

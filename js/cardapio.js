@@ -1,7 +1,7 @@
 import { supabase } from "./supabase.js"
 
 /* =======================
-   ELEMENTOS (BLINDADOS)
+   ELEMENTOS
 ======================= */
 const categoriasEl = document.getElementById("categorias")
 const listaProdutos = document.getElementById("lista-produtos")
@@ -11,10 +11,6 @@ const totalEl = document.getElementById("total")
 const entregaSelect = document.getElementById("entrega") || { value: "retirada" }
 const pagamentoSelect = document.getElementById("pagamento") || { value: "" }
 const trocoInput = document.getElementById("troco") || { value: "", style: {} }
-
-const nomeInput = document.getElementById("nomeCliente") || { value: "" }
-const telefoneInput = document.getElementById("telefoneCliente") || { value: "" }
-const enderecoInput = document.getElementById("enderecoCliente") || { value: "" }
 
 /* =======================
    VARIÁVEIS
@@ -34,29 +30,6 @@ async function iniciar() {
   renderizarCarrinho()
 }
 iniciar()
-
-/* =======================
-   TROCO DINHEIRO
-======================= */
-if (pagamentoSelect.addEventListener) {
-  pagamentoSelect.addEventListener("change", () => {
-    if (pagamentoSelect.value === "dinheiro") {
-      trocoInput.style.display = "block"
-    } else {
-      trocoInput.style.display = "none"
-      trocoInput.value = ""
-    }
-  })
-}
-
-/* =======================
-   ENTREGA
-======================= */
-if (entregaSelect.addEventListener) {
-  entregaSelect.addEventListener("change", () => {
-    renderizarCarrinho()
-  })
-}
 
 /* =======================
    CATEGORIAS
@@ -87,8 +60,7 @@ function criarBotaoCategoria(nome) {
 async function carregarProdutos() {
   const { data } = await supabase
     .from("produtos")
-    .select("*")
-    .eq("ativo", true)
+    .select("*") // ❗ SEM FILTRO ativo
 
   if (data) produtos = data
 }
@@ -99,12 +71,17 @@ async function carregarProdutos() {
 function renderizarProdutos() {
   listaProdutos.innerHTML = ""
 
-  const filtrados = categoriaAtual === "Todos"
-    ? produtos
-    : produtos.filter(p => p.categoria === categoriaAtual)
+  const filtrados =
+    categoriaAtual === "Todos"
+      ? produtos
+      : produtos.filter(
+          p =>
+            p.categoria &&
+            p.categoria.toLowerCase() === categoriaAtual.toLowerCase()
+        )
 
   filtrados.forEach(p => {
-    if (p.categoria.toLowerCase() === "pizza") {
+    if (p.categoria?.toLowerCase() === "pizza") {
       renderizarPizza(p)
     } else {
       renderizarProduto(p)
@@ -120,8 +97,7 @@ function renderizarProduto(p) {
       <h3>${p.nome}</h3>
       <p>${p.descricao || ""}</p>
       <div class="preco">R$ ${Number(p.preco).toFixed(2)}</div>
-      <button class="btn btn-add"
-        onclick='addCarrinho("${p.nome}", ${Number(p.preco)})'>
+      <button class="btn btn-add" onclick="addCarrinho('${p.nome}', ${Number(p.preco)})">
         ➕ Adicionar
       </button>
     </div>
@@ -136,18 +112,15 @@ function renderizarPizza(p) {
       <h3>${p.nome}</h3>
       <p>${p.descricao || ""}</p>
 
-      <button class="btn btn-add"
-        onclick='addCarrinho("${p.nome} (P)", ${Number(p.preco_p)})'>
+      <button class="btn btn-add" onclick="addCarrinho('${p.nome} (P)', ${Number(p.preco_p)})">
         🍕 Pequena — R$ ${Number(p.preco_p).toFixed(2)}
       </button>
 
-      <button class="btn btn-add"
-        onclick='addCarrinho("${p.nome} (M)", ${Number(p.preco_m)})'>
+      <button class="btn btn-add" onclick="addCarrinho('${p.nome} (M)', ${Number(p.preco_m)})">
         🍕 Média — R$ ${Number(p.preco_m).toFixed(2)}
       </button>
 
-      <button class="btn btn-add"
-        onclick='addCarrinho("${p.nome} (G)", ${Number(p.preco_g)})'>
+      <button class="btn btn-add" onclick="addCarrinho('${p.nome} (G)', ${Number(p.preco_g)})">
         🍕 Grande — R$ ${Number(p.preco_g).toFixed(2)}
       </button>
     </div>
@@ -191,10 +164,7 @@ window.enviarPedido = function () {
   }
 
   let subtotal = 0
-  carrinho.forEach(item => {
-    subtotal += item.preco
-  })
-
+  carrinho.forEach(item => (subtotal += item.preco))
   const totalPedido = subtotal + frete
 
   enviarPedidoBackend(totalPedido)
@@ -206,9 +176,7 @@ window.enviarPedido = function () {
 function enviarPedidoBackend(totalPedido) {
   fetch("http://127.0.0.1:5000/novo_pedido", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       itens: carrinho,
       total: totalPedido
@@ -220,12 +188,7 @@ function enviarPedidoBackend(totalPedido) {
       carrinho = []
       renderizarCarrinho()
     })
-    .catch(err => {
-      console.error(err)
+    .catch(() => {
       alert("Erro ao enviar pedido")
     })
 }
-
-/* =======================
-   FIM DO ARQUIVO
-======================= */

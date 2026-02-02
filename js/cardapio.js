@@ -256,22 +256,6 @@ window.enviarPedido = () => {
   mensagem += `%0A💰 *Total:* R$ ${(subtotal + frete).toFixed(2)}`
   mensagem += `%0A🔥 *DanBurgers agradece!*`
 
-fetch("http://127.0.0.1:5000/novo_pedido", {
-    method: "POST",
-    headers: {
-        "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-        itens: carrinho,
-        total: total
-    })
-})
-.then(res => res.json())
-.then(() => {
-    alert("Pedido enviado com sucesso!");
-    carrinho = [];
-    renderizarCarrinho();
-});
 function enviarPedidoBackend() {
     fetch("http://127.0.0.1:5000/novo_pedido", {
         method: "POST",
@@ -290,9 +274,10 @@ function enviarPedidoBackend() {
         renderizarCarrinho();
     })
     .catch(err => {
-        console.error("Erro ao enviar pedido:", err);
+        console.error(err);
         alert("Erro ao enviar pedido");
     });
 }
+
 enviarPedidoBackend();
 }

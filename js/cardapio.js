@@ -1,7 +1,7 @@
 import { supabase } from "./supabase.js"
 
 /* =======================
-   ELEMENTOS (BLINDADOS)
+   ELEMENTOS
 ======================= */
 const categoriasEl = document.getElementById("categorias")
 const listaProdutos = document.getElementById("lista-produtos")
@@ -189,11 +189,10 @@ window.enviarPedido = function () {
     .then(() => {
       alert("Pedido enviado com sucesso")
       carrinho = []
-         renderizarCarrinho()
+      renderizarCarrinho()
     })
     .catch(err => {
       console.error(err)
       alert("Erro ao enviar pedido")
     })
-}
 }

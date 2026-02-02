@@ -182,10 +182,7 @@ function renderizarCarrinho() {
 }
 
 /* =======================
-   WHATSAPP FINAL
-======================= */
-/* =======================
-   WHATSAPP FINAL
+   ENVIO DO PEDIDO
 ======================= */
 window.enviarPedido = () => {
   if (carrinho.length === 0) {
@@ -193,50 +190,11 @@ window.enviarPedido = () => {
     return
   }
 
-  const nome = nomeInput.value.trim()
-  const telefone = telefoneInput.value.trim()
-  const endereco = enderecoInput.value.trim()
-  const pagamento = pagamentoSelect.value
-  const troco = trocoInput.value
-
-  if (!nome || !telefone || !pagamento) {
-    alert("Preencha nome, telefone e pagamento")
-    return
-  }
-
-  if (entregaSelect.value !== "retirada" && !endereco) {
-    alert("Preencha o endereço")
-    return
-  }
-
-  if (pagamento === "dinheiro" && !troco) {
-    alert("Informe o troco")
-    return
-  }
-
-  let mensagem =
-    "🍔🍕 *PEDIDO – DanBurgers* 🍕🍔%0A" +
-    "━━━━━━━━━━━━━━━━━━%0A%0A" +
-    `👤 *Cliente:* ${nome}%0A` +
-    `📞 *Telefone:* ${telefone}%0A`
-
   let subtotal = 0
-  carrinho.forEach((item, i) => {
-    mensagem += `${i + 1}️⃣ ${item.nome} — R$ ${item.preco.toFixed(2)}%0A`
-    subtotal += item.preco
-  })
-
+  carrinho.forEach(i => subtotal += i.preco)
   const totalPedido = subtotal + frete
 
-  mensagem += `%0A💰 *Total:* R$ ${totalPedido.toFixed(2)}`
-
-}
-
-  // 👉 ENVIO PARA BACKEND
   enviarPedidoBackend(totalPedido)
-
-  // 👉 (opcional) continua abrindo WhatsApp se quiser
-  // window.open(`https://wa.me/SEUNUMERO?text=${mensagem}`)
 }
 
 /* =======================
@@ -249,12 +207,8 @@ function enviarPedidoBackend(totalPedido) {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      cliente: nomeInput.value,
-      telefone: telefoneInput.value,
       itens: carrinho,
-      total: totalPedido,
-      pagamento: pagamentoSelect.value,
-      entrega: entregaSelect.value
+      total: totalPedido
     })
   })
     .then(res => res.json())

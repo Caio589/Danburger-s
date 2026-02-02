@@ -5,7 +5,8 @@ import { supabase } from "./supabase.js"
 ======================= */
 const categoriasEl = document.getElementById("categorias")
 const listaProdutos = document.getElementById("lista-produtos")
-const resumoEl = document.getElementById("resumo")
+const
+resumoEl = document.getElementById("resumo")
 const totalEl = document.getElementById("total")
 
 const entregaSelect = document.getElementById("entrega") || { value: "retirada" }

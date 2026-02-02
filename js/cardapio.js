@@ -256,19 +256,18 @@ window.enviarPedido = () => {
   mensagem += `%0A💰 *Total:* R$ ${(subtotal + frete).toFixed(2)}`
   mensagem += `%0A🔥 *DanBurgers agradece!*`
 
-fetch("https://www.danburgers.com.br/novo_pedido", {
+fetch("http://127.0.0.1:5000/novo_pedido", {
     method: "POST",
     headers: {
         "Content-Type": "application/json"
     },
     body: JSON.stringify({
-        itens: JSON.stringify(carrinho),
-        total: total,
-        observacao: observacao.value || ""
+        itens: carrinho,
+        total: total
     })
 })
 .then(res => res.json())
-.then(data => {
+.then(() => {
     alert("Pedido enviado com sucesso!");
     carrinho = [];
     renderizarCarrinho();

@@ -1,33 +1,33 @@
-import { supabase } from "./supabase.js";
+import { supabase } from "./supabase.js"
 
 /* =======================
-   ELEMENTOS
+   ELEMENTOS (BLINDADOS)
 ======================= */
-const categoriasEl = document.getElementById("categorias");
-const listaProdutos = document.getElementById("lista-produtos");
-const resumoEl = document.getElementById("resumo");
-const totalEl = document.getElementById("total");
+const categoriasEl = document.getElementById("categorias")
+const listaProdutos = document.getElementById("lista-produtos")
+const resumoEl = document.getElementById("resumo")
+const totalEl = document.getElementById("total")
 
-const entregaSelect = document.getElementById("entrega") || { value: "retirada" };
+const entregaSelect = document.getElementById("entrega") || { value: "retirada" }
 
 /* =======================
    VARIÁVEIS
 ======================= */
-let produtos = [];
-let carrinho = [];
-let categoriaAtual = "Todos";
-let frete = 0;
+let produtos = []
+let carrinho = []
+let categoriaAtual = "Todos"
+let frete = 0
 
 /* =======================
    START
 ======================= */
 async function iniciar() {
-  await carregarCategorias();
-  await carregarProdutos();
-  renderizarProdutos();
-  renderizarCarrinho();
+  await carregarCategorias()
+  await carregarProdutos()
+  renderizarProdutos()
+  renderizarCarrinho()
 }
-iniciar();
+iniciar()
 
 /* =======================
    CATEGORIAS
@@ -35,28 +35,27 @@ iniciar();
 async function carregarCategorias() {
   const { data, error } = await supabase
     .from("categorias")
-    .select("*");
+    .select("*")
 
   if (error) {
-    console.error(error);
-    return;
+    console.error(error)
+    return
   }
 
-  categoriasEl.innerHTML = "";
-  criarBotaoCategoria("Todos");
-
-  data.forEach(c => criarBotaoCategoria(c.nome));
+  categoriasEl.innerHTML = ""
+  criarBotaoCategoria("Todos")
+  data.forEach(c => criarBotaoCategoria(c.nome))
 }
 
 function criarBotaoCategoria(nome) {
-  const btn = document.createElement("button");
-  btn.className = "btn btn-add";
-  btn.innerText = nome;
+  const btn = document.createElement("button")
+  btn.className = "btn btn-add"
+  btn.innerText = nome
   btn.onclick = () => {
-    categoriaAtual = nome;
-    renderizarProdutos();
-  };
-  categoriasEl.appendChild(btn);
+    categoriaAtual = nome
+    renderizarProdutos()
+  }
+  categoriasEl.appendChild(btn)
 }
 
 /* =======================
@@ -65,21 +64,21 @@ function criarBotaoCategoria(nome) {
 async function carregarProdutos() {
   const { data, error } = await supabase
     .from("produtos")
-    .select("*");
+    .select("*")
 
   if (error) {
-    console.error(error);
-    return;
+    console.error(error)
+    return
   }
 
-  produtos = data || [];
+  produtos = data || []
 }
 
 /* =======================
    RENDER PRODUTOS
 ======================= */
 function renderizarProdutos() {
-  listaProdutos.innerHTML = "";
+  listaProdutos.innerHTML = ""
 
   const filtrados =
     categoriaAtual === "Todos"
@@ -88,19 +87,19 @@ function renderizarProdutos() {
           p =>
             p.categoria &&
             p.categoria.toLowerCase() === categoriaAtual.toLowerCase()
-        );
+        )
 
   filtrados.forEach(p => {
     if (p.categoria?.toLowerCase() === "pizza") {
-      renderizarPizza(p);
+      renderizarPizza(p)
     } else {
-      renderizarProduto(p);
+      renderizarProduto(p)
     }
-  });
+  })
 }
 
 function renderizarProduto(p) {
-  if (p.preco == null) return;
+  if (p.preco == null) return
 
   listaProdutos.innerHTML += `
     <div class="card">
@@ -111,11 +110,11 @@ function renderizarProduto(p) {
         ➕ Adicionar
       </button>
     </div>
-  `;
+  `
 }
 
 function renderizarPizza(p) {
-  if (p.preco_p == null || p.preco_m == null || p.preco_g == null) return;
+  if (p.preco_p == null || p.preco_m == null || p.preco_g == null) return
 
   listaProdutos.innerHTML += `
     <div class="card">
@@ -134,34 +133,34 @@ function renderizarPizza(p) {
         🍕 Grande — R$ ${Number(p.preco_g).toFixed(2)}
       </button>
     </div>
-  `;
+  `
 }
 
 /* =======================
    CARRINHO
 ======================= */
 window.addCarrinho = function (nome, preco) {
-  carrinho.push({ nome, preco });
-  renderizarCarrinho();
-};
+  carrinho.push({ nome, preco })
+  renderizarCarrinho()
+}
 
 function renderizarCarrinho() {
-  resumoEl.innerHTML = "";
-  let subtotal = 0;
+  resumoEl.innerHTML = ""
+  let subtotal = 0
 
   carrinho.forEach(item => {
-    resumoEl.innerHTML += `🛒 ${item.nome} — R$ ${item.preco.toFixed(2)}<br>`;
-    subtotal += item.preco;
-  });
+    resumoEl.innerHTML += `🛒 ${item.nome} — R$ ${item.preco.toFixed(2)}<br>`
+    subtotal += item.preco
+  })
 
-  frete = entregaSelect.value === "fora" ? 7 : 0;
+  frete = entregaSelect.value === "fora" ? 7 : 0
 
-  resumoEl.innerHTML += `<br>`;
+  resumoEl.innerHTML += `<br>`
   resumoEl.innerHTML += frete > 0
     ? `🚗 Frete: R$ ${frete.toFixed(2)}`
-    : `🚚 Frete: Grátis`;
+    : `🚚 Frete: Grátis`
 
-  totalEl.innerText = `Total: R$ ${(subtotal + frete).toFixed(2)}`;
+  totalEl.innerText = `Total: R$ ${(subtotal + frete).toFixed(2)}`
 }
 
 /* =======================
@@ -169,14 +168,14 @@ function renderizarCarrinho() {
 ======================= */
 window.enviarPedido = function () {
   if (carrinho.length === 0) {
-    alert("Carrinho vazio");
-    return;
+    alert("Carrinho vazio")
+    return
   }
 
-  let subtotal = 0;
-  carrinho.forEach(item => subtotal += item.preco);
+  let subtotal = 0
+  carrinho.forEach(item => subtotal += item.preco)
 
-  const totalPedido = subtotal + frete;
+  const totalPedido = subtotal + frete
 
   fetch("http://127.0.0.1:5000/novo_pedido", {
     method: "POST",
@@ -188,12 +187,12 @@ window.enviarPedido = function () {
   })
     .then(res => res.json())
     .then(() => {
-      alert("Pedido enviado com sucesso!");
-      carrinho = [];
-      renderizarCarrinho();
+      alert("Pedido enviado com sucesso")
+      carrinho = []
+      renderizarCarrinho()
     })
     .catch(err => {
-      console.error(err);
-      alert("Erro ao enviar pedido");
-    });
-};
+      console.error(err)
+      alert("Erro ao enviar pedido")
+    })
+}
